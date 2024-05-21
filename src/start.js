@@ -1,14 +1,17 @@
 const http = require('http')
 const httpProxy = require('http-proxy')
 const Debug = require('debug')
-const debugProxy = require('debug')('pubsub-provider:proxy')
-const debugIpfs = require('debug')('pubsub-provider:ipfs')
-Debug.enable('pubsub-provider:*')
+const debugProxy = require('debug')('plebbit-provider:proxy')
+const debugIpfs = require('debug')('plebbit-provider:ipfs')
+Debug.enable('plebbit-provider:*')
 const {execSync, exec} = require('child_process')
 const ipfsBinaryPath = require('path').join(__dirname, '..', 'bin', 'ipfs')
 const fs = require('fs')
 const {URL} = require('url')
-const {proxyLogs} = require('./start-logs')
+const pubsubLogs = process.argv.includes('--pubsub-logs')
+if (pubsubLogs) {
+  const {proxyLogs} = require('./start-logs')
+}
 const {proxySnsProvider} = require('./sns-provider')
 const {proxyEnsProvider} = require('./ens-provider')
 const {proxyIpfsGateway} = require('./ipfs-gateway')
@@ -134,7 +137,7 @@ const startServer = (port) => {
     }
 
     // logs endpoints
-    if (req.url.startsWith('/logs')) {
+    if (pubsubLogs && req.url.startsWith('/logs')) {
       return proxyLogs(proxy, req, res)
     }
 

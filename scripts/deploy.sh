@@ -18,8 +18,8 @@ if [ -z "${DEPLOY_PASSWORD+xxx}" ]; then echo "DEPLOY_PASSWORD not set" && exit;
 
 SCRIPT="
 cd /home
-git clone https://github.com/plebbit/pubsub-provider.git
-cd pubsub-provider
+git clone https://github.com/plebbit/plebbit-provider.git
+cd plebbit-provider
 git reset HEAD --hard
 git pull
 "
@@ -34,11 +34,11 @@ FILE_NAMES=(
 
 # copy files
 for FILE_NAME in ${FILE_NAMES[@]}; do
-  sshpass -p "$DEPLOY_PASSWORD" scp $FILE_NAME "$DEPLOY_USER"@"$DEPLOY_HOST":/home/pubsub-provider
+  sshpass -p "$DEPLOY_PASSWORD" scp $FILE_NAME "$DEPLOY_USER"@"$DEPLOY_HOST":/home/plebbit-provider
 done
 
 SCRIPT="
-cd /home/pubsub-provider
+cd /home/plebbit-provider
 scripts/start-docker.sh
 "
 

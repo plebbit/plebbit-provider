@@ -4,7 +4,7 @@
 
 ```sh
 npm install
-node start
+node start [--pubsub-logs]
 ```
 
 #### Install and start with Docker

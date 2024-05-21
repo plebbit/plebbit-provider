@@ -4,12 +4,12 @@ FROM buildkite/puppeteer:10.0.0
 RUN npm install -g n && n 16
 
 # install
-WORKDIR /usr/src/pubsub-provider
-COPY ./package.json /usr/src/pubsub-provider/package.json
-COPY ./package-lock.json /usr/src/pubsub-provider/package-lock.json
+WORKDIR /usr/src/plebbit-provider
+COPY ./package.json /usr/src/plebbit-provider/package.json
+COPY ./package-lock.json /usr/src/plebbit-provider/package-lock.json
 RUN npm ci
-COPY ./src /usr/src/pubsub-provider/src
-COPY ./bin /usr/src/pubsub-provider/bin
+COPY ./src /usr/src/plebbit-provider/src
+COPY ./bin /usr/src/plebbit-provider/bin
 
 # ipfs p2p port
 EXPOSE 4001

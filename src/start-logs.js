@@ -5,7 +5,7 @@ const path = require('path')
 const logFolderPath = path.resolve(__dirname, '..', 'logs')
 const assert = require('assert')
 const waitOn = require('wait-on')
-const debugLogs = require('debug')('pubsub-provider:logs')
+const debugLogs = require('debug')('plebbit-provider:logs')
 const cborg = require('cborg')
 const {toString} = require('uint8arrays/to-string')
 const {fromString} = require('uint8arrays/from-string')
@@ -16,54 +16,52 @@ const base64 = require('multiformats/bases/base64')
 
 const subplebbits = [
   {
-    "title": "Test sub",
-    "address": "12D3KooWG3XbzoVyAE6Y9vHZKF64Yuuu4TjdgQKedk14iYmTEPWu"
+    "address": "plebtoken.eth",
   },
   {
-    "title": "Plebbit Token",
-    "address": "plebtoken.eth"
+    "address": "plebwhales.eth",
   },
   {
-    "title": "Plebbit Lore",
-    "address": "pleblore.eth"
+    "address": "pleblore.eth",
   },
   {
-    "title": "/pol/",
-    "address": "politically-incorrect.eth"
+    "address": "politically-incorrect.eth",
   },
   {
-    "title": "/biz/",
-    "address": "business-and-finance.eth"
+    "address": "business-and-finance.eth",
   },
   {
-    "address": "movies-tv-anime.eth"
+    "address": "movies-tv-anime.eth",
   },
   {
-    "address": "videos-livestreams-podcasts.eth"
+    "address": "plebmusic.eth",
   },
   {
-    "address": "health-nutrition-science.eth"
+    "address": "videos-livestreams-podcasts.eth",
   },
   {
-    "address": "censorship-watch.eth"
+    "address": "health-nutrition-science.eth",
   },
   {
-    "address": "reddit-screenshots.eth"
+    "address": "censorship-watch.eth",
   },
   {
-    "address": "plebbit-italy.eth"
+    "address": "reddit-screenshots.eth",
   },
   {
-    "title": "Thrifty Plebs",
-    "address": "12D3KooWLiXLKwuWmfzwTRtBasTzDQVNagv8zU63eCEcdw2dT4zB"
+    "address": "weaponized-autism.eth",
   },
   {
-    "title": "Plebs Helping Plebs",
-    "address": "plebshelpingplebs.eth"
+    "address": "brasilandia.eth",
   },
   {
-    "title": "Pleb Whales",
-    "address": "plebwhales.eth"
+    "address": "plebpiracy.eth",
+  },
+  {
+    "address": "technopleb.eth",
+  },
+  {
+    "address": "plebbit-ukraine.eth",
   }
 ]
 

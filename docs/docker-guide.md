@@ -5,7 +5,7 @@
 #### 2. Clone the repo
 
 ```sh
-git clone https://github.com/plebbit/pubsub-provider.git && cd pubsub-provider
+git clone https://github.com/plebbit/plebbit-provider.git && cd plebbit-provider
 ```
 
 #### 3. Start docker

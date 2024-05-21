@@ -6,7 +6,7 @@ docker rm -f precache-gateway 2>/dev/null
 docker build \
   --file config/Dockerfile \
   --no-cache \
-  --tag pubsub-provider \
+  --tag plebbit-provider \
   .  2>/dev/null
 
 docker run \
@@ -15,8 +15,8 @@ docker run \
   --restart always \
   --log-opt max-size=10m \
   --log-opt max-file=5 \
-  --volume=$(pwd)/scripts:/usr/src/pubsub-provider/scripts \
-  pubsub-provider \
+  --volume=$(pwd)/scripts:/usr/src/plebbit-provider/scripts \
+  plebbit-provider \
   node scripts/precache-gateway
 
 docker logs --follow precache-gateway

@@ -18,7 +18,7 @@ if [ -z "${DEPLOY_PASSWORD+xxx}" ]; then echo "DEPLOY_PASSWORD not set" && exit;
 
 SCRIPT="
 cd /home
-git clone https://github.com/plebbit/pubsub-provider.git precache-gateway
+git clone https://github.com/plebbit/plebbit-provider.git precache-gateway
 cd precache-gateway
 git reset HEAD --hard
 git pull

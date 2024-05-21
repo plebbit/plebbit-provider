@@ -2,7 +2,7 @@ const http = require('http')
 const httpProxy = require('http-proxy')
 require('dotenv').config()
 const Debug = require('debug')
-const debug = Debug('pubsub-provider:sns-provider')
+const debug = Debug('plebbit-provider:sns-provider')
 const streamify = require('stream-array')
 
 const chainProviderUrl = process.env.SOL_PROVIDER_URL

@@ -1,5 +1,5 @@
 const fetch = require('node-fetch')
-const debugGateway = require('debug')('pubsub-provider:ipfs-gateway')
+const debugGateway = require('debug')('plebbit-provider:ipfs-gateway')
 
 const maxSize = 1048576
 
