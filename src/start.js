@@ -27,9 +27,31 @@ try {
 }
 catch (e) {}
 
-// turn off local discovery because sometimes it makes VPSes crash
+// custom ipfs settings
 try {
-  execSync(`${ipfsBinaryPath} config profile apply server`, {stdio: 'inherit'})
+  // turn off local discovery because sometimes causes hosting provider to terminate service
+  execSync(`${ipfsBinaryPath} config profile apply server`)
+  execSync(`${ipfsBinaryPath} config --json Discovery.MDNS.Enabled false`, {stdio: 'inherit'})
+  execSync(`${ipfsBinaryPath} config --json Swarm.DisableNatPortMap true`, {stdio: 'inherit'})
+  execSync(`${ipfsBinaryPath} config --json Swarm.EnableHolePunching false`, {stdio: 'inherit'})
+  execSync(`${ipfsBinaryPath} config --json Swarm.RelayClient.Enabled false`, {stdio: 'inherit'})
+
+  // disable helping network with autonat and relay service to save resources
+  execSync(`${ipfsBinaryPath} config AutoNAT.ServiceMode disabled`, {stdio: 'inherit'})
+  execSync(`${ipfsBinaryPath} config --json Swarm.RelayService.Enabled false`, {stdio: 'inherit'})
+  execSync(`${ipfsBinaryPath} config --json Swarm.Transports.Network.Relay false`, {stdio: 'inherit'})
+
+  // disable metrics to save resources
+  execSync(`${ipfsBinaryPath} config --json Swarm.DisableBandwidthMetrics true`, {stdio: 'inherit'})
+
+  // enable delegated routing as part of plebbit provider
+  // not needed because the reverse proxy can expose it
+  // execSync(`${ipfsBinaryPath} config --json Gateway.ExposeRoutingAPI true`, {stdio: 'inherit'})
+
+  // enable webrtc-direct to test it
+  execSync(`${ipfsBinaryPath} config --json Swarm.Transports.Network.WebRTCDirect true`, {stdio: 'inherit'})
+
+  execSync(`${ipfsBinaryPath} config show`, {stdio: 'inherit'})
 }
 catch (e) {
   console.log(e)
