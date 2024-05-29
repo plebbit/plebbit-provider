@@ -45,7 +45,11 @@ try {
   execSync(`${ipfsBinaryPath} config --json Swarm.Transports.Network.Relay false`, {stdio: 'inherit'})
 
   // disable metrics to save resources
-  execSync(`${ipfsBinaryPath} config --json Swarm.DisableBandwidthMetrics true`, {stdio: 'inherit'})
+  // execSync(`${ipfsBinaryPath} config --json Swarm.DisableBandwidthMetrics true`, {stdio: 'inherit'})
+
+  // enable disable metrics to debug
+  execSync(`${ipfsBinaryPath} config --json Swarm.ResourceMgr.Enabled true`, {stdio: 'inherit'})
+  execSync(`${ipfsBinaryPath} config --json Swarm.DisableBandwidthMetrics false`, {stdio: 'inherit'})
 
   // enable delegated routing as part of plebbit provider
   // not needed because the reverse proxy can expose it
@@ -152,12 +156,16 @@ const startServer = (port) => {
       reqHasBasicAuth = true
     }
 
-    // no basic auth allows only pubsub api
-    if (!reqHasBasicAuth && !req.url.startsWith('/api/v0/pubsub/pub') && !req.url.startsWith('/api/v0/pubsub/sub')) {
-      debugProxy(`bad url '${req.url}' 403`)
-      res.statusCode = 403
-      res.end()
-      return
+    // allow debug api
+    if (!req.url.startsWith('/debug/')) {
+
+      // no basic auth allows only pubsub api
+      if (!reqHasBasicAuth && !req.url.startsWith('/api/v0/pubsub/pub') && !req.url.startsWith('/api/v0/pubsub/sub')) {
+        debugProxy(`bad url '${req.url}' 403`)
+        res.statusCode = 403
+        res.end()
+        return
+      }
     }
 
     // fix error 'has been blocked by CORS policy'
