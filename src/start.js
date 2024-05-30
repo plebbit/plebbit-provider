@@ -1,3 +1,4 @@
+require('dotenv').config()
 const http = require('http')
 const httpProxy = require('http-proxy')
 const Debug = require('debug')
@@ -16,13 +17,9 @@ const {proxySnsProvider} = require('./sns-provider')
 const {proxyEnsProvider} = require('./ens-provider')
 const {proxyIpfsGateway} = require('./ipfs-gateway')
 
-// use basic auth to have access to any ipfs api, not just pubsub
-let basicAuth
-try {
-  basicAuth = require('../basic-auth')
-  console.log('using basic auth', basicAuth.user)
-}
-catch (e) {}
+// use basic auth to have access to any ipfs api and /debug/, not just pubsub
+const basicAuthUsername = process.env.BASIC_AUTH_USERNAME
+const basicAuthPassword = process.env.BASIC_AUTH_PASSWORD
 
 // init ipfs binary
 try {
@@ -151,21 +148,29 @@ const startServer = (port) => {
     // basic auth allows any api
     let reqHasBasicAuth = false
     const reqBasicAuthHeader = (req.headers.authorization || '').split(' ')[1] || ''
-    const [reqBasicAuthUser, reqBasicAuthPassword] = Buffer.from(reqBasicAuthHeader, 'base64').toString().split(':')
-    if (basicAuth?.user && basicAuth?.password && basicAuth?.user === reqBasicAuthUser && basicAuth?.password === reqBasicAuthPassword) {
+    const [reqBasicAuthUsername, reqBasicAuthPassword] = Buffer.from(reqBasicAuthHeader, 'base64').toString().split(':')
+    if (basicAuthUsername && basicAuthPassword && basicAuthUsername === reqBasicAuthUsername && basicAuthPassword === reqBasicAuthPassword) {
       reqHasBasicAuth = true
     }
 
-    // allow debug api
-    if (!req.url.startsWith('/debug/')) {
-
-      // no basic auth allows only pubsub api
-      if (!reqHasBasicAuth && !req.url.startsWith('/api/v0/pubsub/pub') && !req.url.startsWith('/api/v0/pubsub/sub')) {
-        debugProxy(`bad url '${req.url}' 403`)
-        res.statusCode = 403
+    // debug api for prometheus metrics https://github.com/ipfs/kubo/blob/master/docs/config.md#internalbitswap 
+    // e.g. http://127.0.0.1:5001/debug/metrics/prometheus
+    if (req.url.startsWith('/debug/')) {
+      // handle basic auth properly to be compatible with prometheus scrape services
+      if ((basicAuthUsername || basicAuthPassword) && !reqHasBasicAuth) {
+        res.setHeader('WWW-Authenticate', 'Basic')
+        res.statusCode = 401
         res.end()
         return
       }
+    }
+
+    // no basic auth allows only pubsub api
+    else if (!reqHasBasicAuth && !req.url.startsWith('/api/v0/pubsub/pub') && !req.url.startsWith('/api/v0/pubsub/sub')) {
+      debugProxy(`bad url '${req.url}' 403`)
+      res.statusCode = 403
+      res.end()
+      return
     }
 
     // fix error 'has been blocked by CORS policy'
