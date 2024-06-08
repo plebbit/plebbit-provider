@@ -53,7 +53,12 @@ try {
   // execSync(`${ipfsBinaryPath} config --json Gateway.ExposeRoutingAPI true`, {stdio: 'inherit'})
 
   // enable webrtc-direct to test it
-  execSync(`${ipfsBinaryPath} config --json Swarm.Transports.Network.WebRTCDirect true`, {stdio: 'inherit'})
+  // execSync(`${ipfsBinaryPath} config --json Swarm.Transports.Network.WebRTCDirect true`, {stdio: 'inherit'})
+
+  // disable TCP to test if it helps stability
+  execSync(`${ipfsBinaryPath} config --json Swarm.Transports.Network.TCP false`, {stdio: 'inherit'})
+  execSync(`${ipfsBinaryPath} config --json Swarm.Transports.Network.Websocket false`, {stdio: 'inherit'})
+  execSync(`${ipfsBinaryPath} config --json Swarm.Transports.Network.WebRTCDirect false`, {stdio: 'inherit'})
 
   execSync(`${ipfsBinaryPath} config show`, {stdio: 'inherit'})
 }
@@ -62,7 +67,7 @@ catch (e) {
 }
 
 // start ipfs daemon
-const ipfsProcess = exec(`${ipfsBinaryPath} daemon --migrate --enable-pubsub-experiment --enable-namesys-pubsub`)
+const ipfsProcess = exec(`LIBP2P_TCP_REUSEPORT=false ${ipfsBinaryPath} daemon --migrate --enable-pubsub-experiment --enable-namesys-pubsub`,)
 console.log(`ipfs process started with pid ${ipfsProcess.pid}`)
 ipfsProcess.stderr.on('data', console.error)
 ipfsProcess.stdin.on('data', debugIpfs)
