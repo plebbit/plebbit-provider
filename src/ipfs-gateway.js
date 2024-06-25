@@ -25,7 +25,12 @@ const proxyIpfsGateway = async (proxy, req, res) => {
       const ipnsName = split[2]
       const fetched = await fetchWithTimeout(`${ipfsApiUrl}/name/resolve?arg=${ipnsName}`, {method: 'POST'})
       const text = await fetched.text()
-      cid = JSON.parse(text).Path.split('/')[2]
+      try {
+        cid = JSON.parse(text).Path.split('/')[2]
+      }
+      catch (e) {
+        throw Error('failed resolving ipns name')
+      }
     }
 
     fetched = await fetchWithTimeout(`${ipfsApiUrl}/cat?arg=${cid}&length=${maxSize}`, {method: 'POST'})
