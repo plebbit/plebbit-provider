@@ -1,6 +1,7 @@
 require('dotenv').config()
 const http = require('http')
 const httpProxy = require('http-proxy')
+const {serverMetrics, sendMetrics} = require('./prometheus')
 const Debug = require('debug')
 const debugProxy = require('debug')('plebbit-provider:proxy')
 const debugIpfs = require('debug')('plebbit-provider:ipfs')
@@ -116,6 +117,7 @@ const isSnsProvider = (req) =>
 // start server
 const startServer = (port) => {
   const server = http.createServer()
+  serverMetrics(server)
 
   // never timeout the keep alive connection
   server.keepAliveTimeout = 0
@@ -125,6 +127,10 @@ const startServer = (port) => {
     if (req.url === '/service-worker.js' || req.url === '/manifest.json' || req.url === '/favicon.ico') {
       res.end()
       return
+    }
+
+    if (req.url === '/metrics') {
+      return sendMetrics(req, res)
     }
 
     // .sol provider
