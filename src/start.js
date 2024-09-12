@@ -49,8 +49,10 @@ proxy.on('proxyReq', function(proxyReq, req, res, options) {
   proxyReq.removeHeader('CDN-Loop')
 })
 
-proxy.on('error', (e) => {
+proxy.on('error', (e, req, res) => {
   console.error(e)
+  // if not ended, will hang forever
+  res.end()
 })
 
 const isSnsProvider = (req) => 

@@ -44,8 +44,10 @@ proxy.on('proxyReq', function(proxyReq, req, res, options) {
   // fix bug where path name has extra / added after
   proxyReq.path = chainProvider.pathname + chainProvider.search
 })
-proxy.on('error', (e) => {
+proxy.on('error', (e, req, res) => {
   console.error(e)
+  // if not ended, will hang forever
+  res.end()
 })
 proxy.on('proxyRes', async (proxyRes, req, res) => {
   // cache response
