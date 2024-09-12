@@ -16,7 +16,7 @@ if (pubsubLogs) {
 }
 const {proxySnsProvider} = require('./sns-provider')
 const {proxyEnsProvider} = require('./ens-provider')
-const {proxyIpfsGateway} = require('./ipfs-gateway')
+const {proxyIpfsGateway, rewriteIpfsGatewaySubdomainsHost} = require('./ipfs-gateway')
 const {proxyIpfsTracker} = require('./ipfs-tracker')
 
 // use basic auth to have access to any ipfs api and /debug/, not just pubsub
@@ -28,6 +28,7 @@ require('./start-ipfs')
 
 // start proxy
 const proxy = httpProxy.createProxyServer({})
+rewriteIpfsGatewaySubdomainsHost(proxy)
 
 // rewrite the request
 proxy.on('proxyReq', function(proxyReq, req, res, options) {

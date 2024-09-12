@@ -17,6 +17,6 @@ docker run \
   --publish 80:80 \
   --publish 4001:4001 \
   --publish 4002:4002 \
-  node:18 sh -c "npm ci && npm start -- --ipfs-gateway-subdomain"
+  node:18 sh -c "npm ci && npm start -- --ipfs-gateway-use-subdomains"
 
 docker logs --follow plebbit-provider

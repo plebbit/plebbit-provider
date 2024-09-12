@@ -9,9 +9,32 @@ const timeoutStatusText = 'Gateway Timeout'
 
 const ipfsApiUrl = 'http://127.0.0.1:5001/api/v0'
 
+const rewriteIpfsGatewaySubdomainsHost = (proxy) => {
+  proxy.on('proxyRes', (proxyRes, req, res) => {
+    let body = ''
+    proxyRes.on('data', (chunk) => {
+      body += chunk.toString()
+    })
+    proxyRes.on('end', () => {
+      // if is ipfs gateway subdomain redirect
+      if (req.method === 'GET' && (req.url.startsWith('/ipfs') || req.url.startsWith('/ipns')) && proxyRes.headers.location) {
+        // rewrite 'localhost' in redirect header
+        const location = proxyRes.headers.location
+        const rewrittenLocation = proxyRes.headers.location.replace('localhost', req.headers.host)
+        res.setHeader('location', rewrittenLocation)
+        // rewrite 'localhost' in redirect body
+        body = body.replace(location, rewrittenLocation)
+      }
+
+      res.end(body)
+    })
+  })
+}
+
 const proxyIpfsGateway = async (proxy, req, res) => {
   debugGateway(req.method, req.headers.host, req.url, req.rawHeaders)
 
+  rewriteRedirectSubdomainHost(proxy)
   // host must match kubo Gateway.PublicGateways config
   const rewriteHeaders = {host: 'localhost'}
 
@@ -83,7 +106,11 @@ const proxyIpfsGateway = async (proxy, req, res) => {
     }
   }
 
-  proxy.web(req, res, {target: 'http://127.0.0.1:8080', headers: rewriteHeaders})
+  proxy.web(req, res, {
+    target: 'http://127.0.0.1:8080', 
+    headers: rewriteHeaders, // rewrite host header to match kubo Gateway.PublicGateways config
+    selfHandleResponse: true // needed to rewrite response body and header with original hostname
+  })
 }
 
 // plebbit json either has signature or comments or allPostCount
@@ -113,4 +140,4 @@ const fetchWithTimeout = async (url, options) => {
   }
 }
 
-module.exports = {proxyIpfsGateway}
+module.exports = {proxyIpfsGateway, rewriteIpfsGatewaySubdomainsHost}
