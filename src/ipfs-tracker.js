@@ -19,7 +19,7 @@ const proxyIpfsTracker = async (proxy, req, res) => {
   // fix error 'has been blocked by CORS policy'
   res.setHeader('Access-Control-Allow-Origin', '*')
 
-  proxy.web(req, res, {target: `http://localhost:${port}`})
+  proxy.web(req, res, {target: `http://127.0.0.1:${port}`})
 }
 
 module.exports = {proxyIpfsTracker}

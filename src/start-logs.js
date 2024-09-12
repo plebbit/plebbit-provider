@@ -10,7 +10,7 @@ const cborg = require('cborg')
 const {toString} = require('uint8arrays/to-string')
 const {fromString} = require('uint8arrays/from-string')
 const IpfsHttpClient = require('ipfs-http-client')
-const ipfsClient = IpfsHttpClient.create({url: 'http://localhost:5001/api/v0'})
+const ipfsClient = IpfsHttpClient.create({url: 'http://127.0.0.1:5001/api/v0'})
 const {resolveEnsTxtRecord} = require('./utils/ens')
 const base64 = require('multiformats/bases/base64')
 
@@ -129,7 +129,7 @@ const pubsubLog = async (subplebbitAddress) => {
 }
 
 // start logging, after IPFS daemon is open
-waitOn({resources: ['http://localhost:5001/webui']}).then(async () => {
+waitOn({resources: ['http://127.0.0.1:5001/webui']}).then(async () => {
   for (const subplebbit of subplebbits) {
     fs.ensureDirSync(path.resolve(logFolderPath, subplebbit.address))
     try {
@@ -158,7 +158,7 @@ server.listen(port)
 
 // use this function in the proxy script
 const proxyLogs = (proxy, req, res) => {
-  proxy.web(req, res, {target: `http://localhost:${port}`})
+  proxy.web(req, res, {target: `http://127.0.0.1:${port}`})
 }
 
 module.exports = {proxyLogs}

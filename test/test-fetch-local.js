@@ -20,7 +20,7 @@ const browserCloudflareHeaders = {
   'sec-fetch-site': 'cross-site',
   'sec-fetch-mode': 'cors',
   'sec-fetch-dest': 'empty',
-  'referer': 'http://localhost:4172/',
+  'referer': 'http://127.0.0.1:4172/',
   'accept-language': 'en-US',
   'CF-Connecting-IP': '185.220.101.61',
   'CDN-Loop': 'cloudflare'
@@ -41,18 +41,18 @@ const browserCloudflareHeaders2 = {
   'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML,like Gecko) HeadlessChrome/90.0.4430.212 Safari/537.36',
   'content-type': 'multipart/form-data; boundary=----WebKitFormBoundaryz3RA5e13o8VLzBXA',
   'accept': '*/*',
-  'origin': 'http://localhost:4172',
+  'origin': 'http://127.0.0.1:4172',
   'sec-fetch-site': 'cross-site',
   'sec-fetch-mode': 'cors',
   'sec-fetch-dest': 'empty',
-  'referer': 'http://localhost:4172/',
+  'referer': 'http://127.0.0.1:4172/',
   'accept-language': 'en-US',
   'CF-Connecting-IP': '23.128.248.64',
   'CDN-Loop': 'cloudflare'
 }
 
 // const agent = new https.Agent({keepAlive: true, maxSockets: 99999})
-const url = 'http://localhost:8000/api/v0'
+const url = 'http://127.0.0.1:8000/api/v0'
 
 ;(async () => {
   const res = await fetch(`${url}/pubsub/sub?arg=ucGxlYmJpdCB0ZXN0OQ`, {method: 'POST', headers: browserCloudflareHeaders2})

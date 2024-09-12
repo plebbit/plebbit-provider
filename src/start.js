@@ -31,6 +31,11 @@ const proxy = httpProxy.createProxyServer({})
 
 // rewrite the request
 proxy.on('proxyReq', function(proxyReq, req, res, options) {
+  // rewrite ipfs gateway to be subdomain for testing
+  // proxyReq.host = 'bafybeihttekooxzx3ho3toosabl33jee7cmqon3jof2cd4zvzx26p3zoqu.ipfs.localhost'
+  // proxyReq.path = '/'
+  // proxyReq.setHeader('host', 'bafybeihttekooxzx3ho3toosabl33jee7cmqon3jof2cd4zvzx26p3zoqu.ipfs.localhost:8080')
+
   // remove headers that could potentially cause an ipfs 403 error
   proxyReq.removeHeader('CF-IPCountry')
   proxyReq.removeHeader('X-Forwarded-For')
@@ -69,6 +74,10 @@ const startServer = (port) => {
   server.keepAliveTimeout = 0
 
   server.on('request', async (req, res) => {
+    // rewrite ipfs gateway to be subdomain for testing
+    // req.host = 'bafybeihttekooxzx3ho3toosabl33jee7cmqon3jof2cd4zvzx26p3zoqu.ipfs.localhost'
+    // req.url = '/'
+
     // unrelated endpoints
     if (req.url === '/service-worker.js' || req.url === '/manifest.json' || req.url === '/favicon.ico') {
       res.end()
@@ -90,7 +99,8 @@ const startServer = (port) => {
     }
 
     // ipfs gateway endpoints
-    if (req.method === 'GET' && (req.url.startsWith('/ipfs') || req.url.startsWith('/ipns'))) {
+    const subdomains = req.host.split('.')
+    if (req.method === 'GET' && (subdomains[1] === 'ipfs' || subdomains[1] === 'ipns' || req.url.startsWith('/ipfs') || req.url.startsWith('/ipns'))) {
       return proxyIpfsGateway(proxy, req, res)
     }
 
@@ -138,7 +148,7 @@ const startServer = (port) => {
     // fix error 'has been blocked by CORS policy'
     res.setHeader('Access-Control-Allow-Origin', '*')
 
-    proxy.web(req, res, {target: 'http://localhost:5001'})
+    proxy.web(req, res, {target: 'http://127.0.0.1:5001'})
   })
   server.on('error', console.error)
   server.listen(port)

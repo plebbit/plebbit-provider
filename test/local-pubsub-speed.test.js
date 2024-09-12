@@ -2,7 +2,7 @@ const IpfsHttpClient = require('ipfs-http-client')
 const {toString} = require('uint8arrays/to-string')
 const {Buffer} = require('buffer')
 
-const url = 'http://localhost:4023/api/v0'
+const url = 'http://127.0.0.1:4023/api/v0'
 const ipfsClient = IpfsHttpClient.create(url)
 
 let lastTimestamp

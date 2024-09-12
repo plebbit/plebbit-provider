@@ -11,6 +11,7 @@ const fs = require('fs-extra')
 const https = require('https')
 const ProgressBar = require('progress')
 const decompress = require('decompress')
+const ipfsGatewaySubdomain = Boolean(process.argv.includes('--ipfs-gateway-subdomain'))
 
 const ipfsClientVersion = '0.30.0'
 const ipfsClientLinuxUrl = `https://dist.ipfs.io/kubo/v${ipfsClientVersion}/kubo_v${ipfsClientVersion}_linux-amd64.tar.gz`
@@ -70,6 +71,12 @@ async function initIpfs() {
     execSync(`${ipfsBinaryPath} config --json Swarm.Transports.Network.TCP false`, {env, stdio: 'inherit'})
     execSync(`${ipfsBinaryPath} config --json Swarm.Transports.Network.Websocket false`, {env, stdio: 'inherit'})
     // execSync(`${ipfsBinaryPath} config --json Swarm.Transports.Network.WebRTCDirect false`, {env, stdio: 'inherit'})
+
+    // config gateway
+    const PublicGateways = {
+      localhost: {Paths: ['/ipfs', '/ipns'], UseSubdomains: ipfsGatewaySubdomain}
+    }
+    execSync(`${ipfsBinaryPath} config  --json Gateway.PublicGateways '${JSON.stringify(PublicGateways)}'`, {env, stdio: 'inherit'})
 
     // create http routers config
     const httpRoutersConfig = {

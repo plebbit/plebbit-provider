@@ -7,17 +7,25 @@ const plebbitErrorMessage = 'this ipfs gateway only serves plebbit content'
 const timeoutStatus = 504
 const timeoutStatusText = 'Gateway Timeout'
 
-const ipfsApiUrl = 'http://localhost:5001/api/v0'
+const ipfsApiUrl = 'http://127.0.0.1:5001/api/v0'
 
 const proxyIpfsGateway = async (proxy, req, res) => {
-  debugGateway(req.method, req.url, req.rawHeaders)
+  debugGateway(req.method, req.host, req.url, req.rawHeaders)
 
   // fix error 'has been blocked by CORS policy'
   res.setHeader('Access-Control-Allow-Origin', '*')
 
-  const split = req.url.split('/')
-  const isIpns = split[1] === 'ipns'
-  let cid = !isIpns ? split[2] : undefined
+  let cid, isIpns
+  const subdomains = req.host.split('.')
+  if (subdomains[1] === 'ipfs' || subdomains[1] === 'ipns') {
+    cid = subdomains[0]
+    isIpns = subdomains[1] === 'ipns'
+  }
+  else {
+    const split = req.url.split('/')
+    isIpns = split[1] === 'ipns'
+    cid = !isIpns ? split[2] : undefined
+  }
 
   let fetched, text, error, json
   try {
@@ -41,7 +49,7 @@ const proxyIpfsGateway = async (proxy, req, res) => {
     error = e
   }
 
-  debugGateway(req.method, req.url, fetched?.status, fetched?.statusText, error?.message)
+  debugGateway(req.method, req.host, req.url, fetched?.status, fetched?.statusText, error?.message)
 
   // request timed out
   if (error?.message === 'request timed out') {
@@ -70,7 +78,7 @@ const proxyIpfsGateway = async (proxy, req, res) => {
     }
   }
 
-  proxy.web(req, res, {target: 'http://localhost:8080'})
+  proxy.web(req, res, {target: 'http://127.0.0.1:8080'})
 }
 
 // plebbit json either has signature or comments or allPostCount

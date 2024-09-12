@@ -185,7 +185,7 @@ const getBodyChunks = (req) => new Promise((resolve, reject) => {
 
 // use this function in the proxy script
 const proxyEnsProvider = (proxy, req, res) => {
-  proxy.web(req, res, {target: `http://localhost:${port}`})
+  proxy.web(req, res, {target: `http://127.0.0.1:${port}`})
 }
 
 module.exports = {proxyEnsProvider}
