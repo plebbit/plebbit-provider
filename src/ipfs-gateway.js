@@ -34,7 +34,6 @@ const rewriteIpfsGatewaySubdomainsHost = (proxy) => {
 const proxyIpfsGateway = async (proxy, req, res) => {
   debugGateway(req.method, req.headers.host, req.url, req.rawHeaders)
 
-  rewriteRedirectSubdomainHost(proxy)
   // host must match kubo Gateway.PublicGateways config
   const rewriteHeaders = {host: 'localhost'}
 
