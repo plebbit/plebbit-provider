@@ -73,7 +73,7 @@ async function initIpfs() {
     // execSync(`${ipfsBinaryPath} config --json Swarm.Transports.Network.WebRTCDirect false`, {env, stdio: 'inherit'})
 
     // config gateway
-    const PublicGateways = {
+    let PublicGateways = {
       localhost: {Paths: ['/ipfs', '/ipns'], UseSubdomains: ipfsGatewaySubdomain}
     }
     execSync(`${ipfsBinaryPath} config  --json Gateway.PublicGateways '${JSON.stringify(PublicGateways)}'`, {env, stdio: 'inherit'})

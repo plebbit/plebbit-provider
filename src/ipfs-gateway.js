@@ -13,7 +13,7 @@ const proxyIpfsGateway = async (proxy, req, res) => {
   debugGateway(req.method, req.headers.host, req.url, req.rawHeaders)
 
   // host must match kubo Gateway.PublicGateways config
-  const rewriteHeaders = {host: 'localhost', Host: 'localhost'}
+  const rewriteHeaders = {host: 'localhost'}
 
   // fix error 'has been blocked by CORS policy'
   res.setHeader('Access-Control-Allow-Origin', '*')
@@ -25,7 +25,6 @@ const proxyIpfsGateway = async (proxy, req, res) => {
     isIpns = subdomains[1] === 'ipns'
     // host must match kubo Gateway.PublicGateways config
     rewriteHeaders.host = `${subdomains[0]}.${subdomains[1]}.localhost`
-    rewriteHeaders.Host = `${subdomains[0]}.${subdomains[1]}.localhost`
   }
   else {
     const split = req.url.split('/')
@@ -84,7 +83,7 @@ const proxyIpfsGateway = async (proxy, req, res) => {
     }
   }
 
-  proxy.web(req, res, {target: 'http://127.0.0.1:8080', headers: rewriteHeaders, changeOrigin: true})
+  proxy.web(req, res, {target: 'http://127.0.0.1:8080', headers: rewriteHeaders})
 }
 
 // plebbit json either has signature or comments or allPostCount
