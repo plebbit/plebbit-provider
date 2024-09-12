@@ -84,7 +84,7 @@ const proxyIpfsGateway = async (proxy, req, res) => {
     }
   }
 
-  proxy.web(req, res, {target: 'http://127.0.0.1:8080', headers: rewriteHeaders})
+  proxy.web(req, res, {target: 'http://127.0.0.1:8080', headers: rewriteHeaders, changeOrigin: true})
 }
 
 // plebbit json either has signature or comments or allPostCount
