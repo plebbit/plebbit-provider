@@ -17,6 +17,7 @@ if (pubsubLogs) {
 const {proxySnsProvider} = require('./sns-provider')
 const {proxyEnsProvider} = require('./ens-provider')
 const {proxyIpfsGateway} = require('./ipfs-gateway')
+const {proxyIpfsTracker} = require('./ipfs-tracker')
 
 // use basic auth to have access to any ipfs api and /debug/, not just pubsub
 const basicAuthUsername = process.env.BASIC_AUTH_USERNAME
@@ -146,6 +147,11 @@ const startServer = (port) => {
     // ipfs gateway endpoints
     if (req.method === 'GET' && (req.url.startsWith('/ipfs') || req.url.startsWith('/ipns'))) {
       return proxyIpfsGateway(proxy, req, res)
+    }
+
+    // ipfs tracker endpoints
+    if (req.url.startsWith('/routing/v1/providers')) {
+      return proxyIpfsTracker(proxy, req, res)
     }
 
     // logs endpoints

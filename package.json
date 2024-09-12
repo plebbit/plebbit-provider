@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@plebbit/ipfs-tracker": "https://github.com/plebbit/ipfs-tracker.git",
     "cborg": "2.0.3",
     "debug": "4.3.4",
     "ethers": "6.7.0",

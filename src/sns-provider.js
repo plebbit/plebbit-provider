@@ -140,7 +140,7 @@ const startServer = (port) => {
   server.on('error', console.error)
 
   server.listen(port)
-  console.log(`proxy server listening on port ${port}`)
+  console.log(`sns proxy server listening on port ${port}`)
 }
 const port = 29554
 startServer(port)
