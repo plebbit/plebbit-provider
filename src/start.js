@@ -23,65 +23,8 @@ const {proxyIpfsTracker} = require('./ipfs-tracker')
 const basicAuthUsername = process.env.BASIC_AUTH_USERNAME
 const basicAuthPassword = process.env.BASIC_AUTH_PASSWORD
 
-// init ipfs binary
-try {
-  execSync(`${ipfsBinaryPath} init`, {stdio: 'inherit'})
-}
-catch (e) {}
-
-// custom ipfs settings
-try {
-  // turn off local discovery because sometimes causes hosting provider to terminate service
-  execSync(`${ipfsBinaryPath} config profile apply server`)
-  execSync(`${ipfsBinaryPath} config --json Discovery.MDNS.Enabled false`, {stdio: 'inherit'})
-  execSync(`${ipfsBinaryPath} config --json Swarm.DisableNatPortMap true`, {stdio: 'inherit'})
-  execSync(`${ipfsBinaryPath} config --json Swarm.EnableHolePunching false`, {stdio: 'inherit'})
-  execSync(`${ipfsBinaryPath} config --json Swarm.RelayClient.Enabled false`, {stdio: 'inherit'})
-
-  // disable helping network with autonat and relay service to save resources
-  execSync(`${ipfsBinaryPath} config AutoNAT.ServiceMode disabled`, {stdio: 'inherit'})
-  execSync(`${ipfsBinaryPath} config --json Swarm.RelayService.Enabled false`, {stdio: 'inherit'})
-  execSync(`${ipfsBinaryPath} config --json Swarm.Transports.Network.Relay false`, {stdio: 'inherit'})
-
-  // disable metrics to save resources
-  // execSync(`${ipfsBinaryPath} config --json Swarm.DisableBandwidthMetrics true`, {stdio: 'inherit'})
-
-  // enable disable metrics to debug
-  execSync(`${ipfsBinaryPath} config --json Swarm.ResourceMgr.Enabled true`, {stdio: 'inherit'})
-  execSync(`${ipfsBinaryPath} config --json Swarm.DisableBandwidthMetrics false`, {stdio: 'inherit'})
-
-  // enable delegated routing as part of plebbit provider
-  // not needed because the reverse proxy can expose it
-  // execSync(`${ipfsBinaryPath} config --json Gateway.ExposeRoutingAPI true`, {stdio: 'inherit'})
-
-  // enable webrtc-direct to test it
-  // execSync(`${ipfsBinaryPath} config --json Swarm.Transports.Network.WebRTCDirect true`, {stdio: 'inherit'})
-
-  // disable TCP to test if it helps stability
-  execSync(`${ipfsBinaryPath} config --json Swarm.Transports.Network.TCP false`, {stdio: 'inherit'})
-  execSync(`${ipfsBinaryPath} config --json Swarm.Transports.Network.Websocket false`, {stdio: 'inherit'})
-  execSync(`${ipfsBinaryPath} config --json Swarm.Transports.Network.WebRTCDirect false`, {stdio: 'inherit'})
-
-  execSync(`${ipfsBinaryPath} config show`, {stdio: 'inherit'})
-}
-catch (e) {
-  console.log(e)
-}
-
-// start ipfs daemon
-const ipfsProcess = exec(`LIBP2P_TCP_REUSEPORT=false ${ipfsBinaryPath} daemon --migrate --enable-pubsub-experiment --enable-namesys-pubsub`,)
-console.log(`ipfs process started with pid ${ipfsProcess.pid}`)
-ipfsProcess.stderr.on('data', console.error)
-ipfsProcess.stdin.on('data', debugIpfs)
-ipfsProcess.stdout.on('data', debugIpfs)
-ipfsProcess.on('error', console.error)
-ipfsProcess.on('exit', () => {
-  console.error(`ipfs process with pid ${ipfsProcess.pid} exited`)
-  process.exit(1)
-})
-process.on("exit", () => {
-  exec(`kill ${ipfsProcess.pid + 1}`)
-})
+// start ipfs
+require('./start-ipfs')
 
 // start proxy
 const proxy = httpProxy.createProxyServer({})

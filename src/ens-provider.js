@@ -157,7 +157,7 @@ const startServer = (port) => {
   })
   server.on('error', console.error)
   server.listen(port)
-  console.log(`proxy server listening on port ${port}`)
+  console.log(`ens proxy server listening on port ${port}`)
 }
 const port = 29553
 startServer(port)
