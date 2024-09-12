@@ -18,10 +18,10 @@ if [ -z "${DEPLOY_PASSWORD+xxx}" ]; then echo "DEPLOY_PASSWORD not set" && exit;
 
 SCRIPT="
 cd /home
+# rm -fr plebbit-provider
 git clone https://github.com/plebbit/plebbit-provider.git
 cd plebbit-provider
 git reset HEAD --hard
-git pull
 "
 
 # execute script over ssh
