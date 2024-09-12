@@ -17,6 +17,6 @@ docker run \
   --publish 80:80 \
   --publish 4001:4001 \
   --publish 4002:4002 \
-  node:18 sh -c "PUPPETEER_SKIP_DOWNLOAD=1 npm ci && npm start"
+  node:18 sh -c "npm ci && npm start -- --ipfs-gateway-subdomain"
 
 docker logs --follow plebbit-provider

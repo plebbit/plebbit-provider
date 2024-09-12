@@ -75,7 +75,7 @@ const startServer = (port) => {
 
   server.on('request', async (req, res) => {
     // rewrite ipfs gateway to be subdomain for testing
-    // req.host = 'bafybeihttekooxzx3ho3toosabl33jee7cmqon3jof2cd4zvzx26p3zoqu.ipfs.localhost'
+    // req.headers.host = 'bafybeihttekooxzx3ho3toosabl33jee7cmqon3jof2cd4zvzx26p3zoqu.ipfs.localhost'
     // req.url = '/'
 
     // unrelated endpoints
@@ -99,7 +99,7 @@ const startServer = (port) => {
     }
 
     // ipfs gateway endpoints
-    const subdomains = req.host.split('.')
+    const subdomains = req.headers.host.split('.')
     if (req.method === 'GET' && (subdomains[1] === 'ipfs' || subdomains[1] === 'ipns' || req.url.startsWith('/ipfs') || req.url.startsWith('/ipns'))) {
       return proxyIpfsGateway(proxy, req, res)
     }
