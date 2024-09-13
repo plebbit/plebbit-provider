@@ -64,30 +64,37 @@ const proxyIpfsGateway = async (proxy, req, res) => {
     return
   }
 
-  let cid, isIpns
+  let cid, ipnsName
   if (subdomains[1] === 'ipfs' || subdomains[1] === 'ipns') {
-    cid = subdomains[0]
-    isIpns = subdomains[1] === 'ipns'
+    if (subdomains[1] === 'ipns') {
+      ipnsName = subdomains[0]
+    }
+    else {
+      cid = subdomains[0]
+    }
     // host must match kubo Gateway.PublicGateways config
     rewriteHeaders.host = `${subdomains[0]}.${subdomains[1]}.localhost`
   }
   else {
     const params = req.url.split('/')
-    isIpns = params[1] === 'ipns'
-    cid = !isIpns ? params[2] : undefined
+    if (params[1] === 'ipns') {
+      ipnsName = params[2]
+    }
+    else {
+      cid = params[2]
+    }
   }
 
   let fetched, text, error, json
   try {
-    if (isIpns) {
-      const ipnsName = cid
+    if (ipnsName) {
       const fetched = await fetchWithTimeout(`${ipfsApiUrl}/name/resolve?arg=${ipnsName}`, {method: 'POST'})
       const text = await fetched.text()
       try {
         cid = JSON.parse(text).Path.split('/')[2]
       }
       catch (e) {
-        throw Error(`failed resolving ipns name: ${text}`)
+        throw Error(`failed resolving ipns name: '${text}'`)
       }
     }
 
@@ -118,7 +125,7 @@ const proxyIpfsGateway = async (proxy, req, res) => {
 
   // set custom cache if request is successful
   if (fetched?.status < 300) {
-    if (isIpns) {
+    if (ipnsName) {
       // the ipns expires after 1 minutes (60 seconds), must revalidate if expired
       rewriteHeaders['cache-control'] = 'public, max-age=60, must-revalidate'
     }
