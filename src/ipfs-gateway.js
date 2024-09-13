@@ -52,7 +52,7 @@ const proxyIpfsGateway = async (proxy, req, res) => {
   // fix error 'has been blocked by CORS policy'
   res.setHeader('Access-Control-Allow-Origin', '*')
 
-  const subdomains = req.headers.host.split('.')
+  const subdomains = req.headers.host?.split('.') || []
   // if is subdomain redirect, redirect right away
   if (ipfsGatewayUseSubdomains && (subdomains[1] !== 'ipfs' && subdomains[1] !== 'ipns')) {
     rewriteHeaders['cache-control'] = 'public, max-age=31536000, immutable'
