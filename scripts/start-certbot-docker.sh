@@ -11,7 +11,7 @@ fi
 
 # CLOUDFLARE_API_TOKEN=your-cloudflare-api-token
 CERT_EMAIL=estebanabaroa@protonmail.com
-DOMAIN=pleb.bot
+DOMAIN=ipfsgateway.xyz
 
 # create certbot credentials files
 mkdir -p letsencrypt
@@ -60,8 +60,9 @@ docker run \
 mkdir -p nginx
 cat > nginx/nginx.conf <<EOF
 user nginx;
-worker_processes auto;
 
+# 1 worker per cpu, 1024 connections per worker, same as default, maybe change later
+worker_processes auto;
 events {
     worker_connections 1024;
 }
