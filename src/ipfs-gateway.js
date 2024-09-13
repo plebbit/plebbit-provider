@@ -1,5 +1,6 @@
 const fetch = require('node-fetch')
 const debugGateway = require('debug')('plebbit-provider:ipfs-gateway')
+const ipfsGatewayUseSubdomains = process.argv.includes('--ipfs-gateway-use-subdomains')
 
 const maxSize = 1048576
 
@@ -8,25 +9,36 @@ const timeoutStatus = 504
 const timeoutStatusText = 'Gateway Timeout'
 
 const ipfsApiUrl = 'http://127.0.0.1:5001/api/v0'
+const ipfsGatewayUrl = 'http://127.0.0.1:8080'
 
 const rewriteIpfsGatewaySubdomainsHost = (proxy) => {
+  if (!ipfsGatewayUseSubdomains) {
+    return
+  }
   proxy.on('proxyRes', (proxyRes, req, res) => {
-    let body = ''
-    proxyRes.on('data', (chunk) => {
-      body += chunk.toString()
-    })
-    proxyRes.on('end', () => {
-      // if is ipfs gateway subdomain redirect
-      if (req.method === 'GET' && (req.url.startsWith('/ipfs') || req.url.startsWith('/ipns')) && proxyRes.headers.location) {
-        // rewrite 'localhost' in redirect header
-        const location = proxyRes.headers.location
-        const rewrittenLocation = proxyRes.headers.location.replace('localhost', req.headers.host)
-        res.setHeader('location', rewrittenLocation)
-        // rewrite 'localhost' in redirect body
-        body = body.replace(location, rewrittenLocation)
-      }
+    // request is not a subdomain redirect, ignore it
+    if (req.method !== 'GET' || !proxyRes.headers.location || (!req.url.startsWith('/ipfs') && !req.url.startsWith('/ipns'))) {
+      res.writeHead(proxyRes.statusCode, proxyRes.headers)
+      proxyRes.pipe(res)
+      return
+    }
 
-      res.end(body)
+    // wait for body
+    let body = ''
+    proxyRes.on('data', (chunk) => {body += chunk})
+    proxyRes.on('end', () => {
+      // rewrite 'localhost' in redirect header
+      const location = proxyRes.headers.location
+      const rewrittenLocation = location.replace('localhost', req.headers.host)
+      // rewrite 'localhost' in redirect body
+      const rewrittenBody = body.replace(location, rewrittenLocation)
+
+      // proxy headers
+      Object.keys(proxyRes.headers).forEach((header) => res.setHeader(header, proxyRes.headers[header]))
+      res.setHeader('location', rewrittenLocation)
+      res.setHeader('content-length', rewrittenBody.length)
+      // proxy body
+      res.end(rewrittenBody)
     })
   })
 }
@@ -40,8 +52,18 @@ const proxyIpfsGateway = async (proxy, req, res) => {
   // fix error 'has been blocked by CORS policy'
   res.setHeader('Access-Control-Allow-Origin', '*')
 
-  let cid, isIpns
   const subdomains = req.headers.host.split('.')
+  // if is subdomain redirect, redirect right away
+  if (ipfsGatewayUseSubdomains && (subdomains[1] !== 'ipfs' && subdomains[1] !== 'ipns')) {
+    proxy.web(req, res, {
+      target: ipfsGatewayUrl, 
+      headers: rewriteHeaders, // rewrite host header to match kubo Gateway.PublicGateways config
+      selfHandleResponse: true // needed to rewrite response body and headers redirect location with original hostname
+    })
+    return
+  }
+
+  let cid, isIpns
   if (subdomains[1] === 'ipfs' || subdomains[1] === 'ipns') {
     cid = subdomains[0]
     isIpns = subdomains[1] === 'ipns'
@@ -106,9 +128,8 @@ const proxyIpfsGateway = async (proxy, req, res) => {
   }
 
   proxy.web(req, res, {
-    target: 'http://127.0.0.1:8080', 
+    target: ipfsGatewayUrl, 
     headers: rewriteHeaders, // rewrite host header to match kubo Gateway.PublicGateways config
-    selfHandleResponse: true // needed to rewrite response body and header with original hostname
   })
 }
 

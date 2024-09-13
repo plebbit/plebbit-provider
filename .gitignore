@@ -11,6 +11,7 @@ bin
 .ipfs
 letsencrypt
 cloudflare
+nginx
 
 # Logs
 logs

@@ -11,7 +11,7 @@ const fs = require('fs-extra')
 const https = require('https')
 const ProgressBar = require('progress')
 const decompress = require('decompress')
-const ipfsGatewayUseSubdomains = Boolean(process.argv.includes('--ipfs-gateway-use-subdomains'))
+const ipfsGatewayUseSubdomains = process.argv.includes('--ipfs-gateway-use-subdomains')
 
 const ipfsClientVersion = '0.30.0'
 const ipfsClientLinuxUrl = `https://dist.ipfs.io/kubo/v${ipfsClientVersion}/kubo_v${ipfsClientVersion}_linux-amd64.tar.gz`
