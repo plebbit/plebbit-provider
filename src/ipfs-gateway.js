@@ -29,7 +29,7 @@ const rewriteIpfsGatewaySubdomainsHost = (proxy) => {
     proxyRes.on('end', () => {
       // rewrite 'localhost' in redirect header
       const location = proxyRes.headers.location
-      const rewrittenLocation = location.replace('localhost', req.headers.host)
+      const rewrittenLocation = location.replace('localhost', req.headers.host).replace('http://', 'https://')
       // rewrite 'localhost' in redirect body
       const rewrittenBody = body.replace(location, rewrittenLocation)
 
@@ -130,6 +130,7 @@ const proxyIpfsGateway = async (proxy, req, res) => {
   proxy.web(req, res, {
     target: ipfsGatewayUrl, 
     headers: rewriteHeaders, // rewrite host header to match kubo Gateway.PublicGateways config
+    selfHandleResponse: true // content-type error without it, not sure why, curl says "* Excess found in a read: excess"
   })
 }
 
