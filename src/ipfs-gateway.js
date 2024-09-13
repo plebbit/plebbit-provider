@@ -87,7 +87,7 @@ const proxyIpfsGateway = async (proxy, req, res) => {
         cid = JSON.parse(text).Path.split('/')[2]
       }
       catch (e) {
-        throw Error('failed resolving ipns name')
+        throw Error(`failed resolving ipns name: ${text}`)
       }
     }
 
