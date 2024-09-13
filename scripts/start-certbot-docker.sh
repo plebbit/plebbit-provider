@@ -67,6 +67,13 @@ events {
 }
 
 http {
+    # enable caching
+    proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=plebbit-provider-cache:10m max_size=1g inactive=60m use_temp_path=off;
+
+    # remove nginx header
+    server_tokens off;
+    add_header Server "";
+
     # logging
     access_log /var/log/nginx/access.log;
     error_log /var/log/nginx/error.log;
@@ -104,9 +111,15 @@ http {
         location / {
             proxy_pass http://127.0.0.1:80;
             proxy_set_header Host \$host;
-            proxy_set_header X-Real-IP \$remote_addr;
             proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto \$scheme;
+
+            # enable caching
+            proxy_cache plebbit-provider-cache;
+            # make sure subdomain is included in cache keys
+            proxy_cache_key "\$scheme\$host\$request_uri";
+            # only cache if cache-control header is present
+            proxy_cache_bypass \$http_cache_control;
         }
     }
 }
