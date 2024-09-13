@@ -65,7 +65,6 @@ const proxyIpfsGateway = async (proxy, req, res) => {
   }
 
   let cid, isIpns
-  const params = req.url.split('/')
   if (subdomains[1] === 'ipfs' || subdomains[1] === 'ipns') {
     cid = subdomains[0]
     isIpns = subdomains[1] === 'ipns'
@@ -73,6 +72,7 @@ const proxyIpfsGateway = async (proxy, req, res) => {
     rewriteHeaders.host = `${subdomains[0]}.${subdomains[1]}.localhost`
   }
   else {
+    const params = req.url.split('/')
     isIpns = params[1] === 'ipns'
     cid = !isIpns ? params[2] : undefined
   }
@@ -80,7 +80,7 @@ const proxyIpfsGateway = async (proxy, req, res) => {
   let fetched, text, error, json
   try {
     if (isIpns) {
-      const ipnsName = params[2]
+      const ipnsName = cid
       const fetched = await fetchWithTimeout(`${ipfsApiUrl}/name/resolve?arg=${ipnsName}`, {method: 'POST'})
       const text = await fetched.text()
       try {
