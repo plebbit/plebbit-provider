@@ -40,7 +40,7 @@ done
 
 SCRIPT="
 cd /home/plebbit-provider
-scripts/start-docker.sh
+scripts/start-docker.sh --ipfs-gateway-use-subdomains
 "
 
 echo "$SCRIPT" | sshpass -p "$DEPLOY_PASSWORD" ssh "$DEPLOY_USER"@"$DEPLOY_HOST"

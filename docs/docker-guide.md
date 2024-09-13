@@ -47,3 +47,23 @@ curl https://ipfs.io/ipns/12D3KooWG3XbzoVyAE6Y9vHZKF64Yuuu4TjdgQKedk14iYmTEPWu
 ```
 
 > NOTE: it can take a few hours for DNS to propagate, so if it doesn't work, try again later
+
+#### 6. Add ipfs gateway subdomains (optional)
+
+1. Create a cloudflare api token
+  - Go to https://dash.cloudflare.com/profile/api-tokens
+  - Choose "Edit zone DNS"
+  - Under "Zone Resources", select your domain name
+  - Continue
+
+2. Run the SSL certificate script
+  - Open the script `scripts/start-certbot-docker.sh` in a file editor (e.g. `nano scripts/start-certbot-docker.sh`)
+  - Edit the variables `CLOUDFLARE_API_TOKEN=`, `CERT_EMAIL=`, and `DOMAIN=` and save the file
+  - Run the script `scripts/start-certbot-docker.sh`
+  - Check the output to see if it succeeded
+
+3. Restart docker with the `--ipfs-gateway-use-subdomains` option
+
+```sh
+scripts/start-docker.sh --ipfs-gateway-use-subdomains
+```

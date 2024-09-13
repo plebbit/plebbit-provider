@@ -24,19 +24,19 @@ EOF
 chmod 600 cloudflare/cloudflare.ini
 
 # start certbot
-# docker run --rm \
-#   -v $(pwd)/letsencrypt:/etc/letsencrypt \
-#   -v $(pwd)/cloudflare:/cloudflare \
-#   certbot/dns-cloudflare:v2.11.0 certonly \
-#   --dns-cloudflare \
-#   --dns-cloudflare-credentials /cloudflare/cloudflare.ini \
-#   -d *.ipfs.${DOMAIN} -d *.ipns.${DOMAIN} \
-#   --agree-tos \
-#   --non-interactive \
-#   --email $CERT_EMAIL \
-#   --preferred-challenges dns-01 \
-#   --server https://acme-v02.api.letsencrypt.org/directory \
-#   --dns-cloudflare-propagation-seconds 60
+docker run --rm \
+  -v $(pwd)/letsencrypt:/etc/letsencrypt \
+  -v $(pwd)/cloudflare:/cloudflare \
+  certbot/dns-cloudflare:v2.11.0 certonly \
+  --dns-cloudflare \
+  --dns-cloudflare-credentials /cloudflare/cloudflare.ini \
+  -d *.ipfs.${DOMAIN} -d *.ipns.${DOMAIN} \
+  --agree-tos \
+  --non-interactive \
+  --email $CERT_EMAIL \
+  --preferred-challenges dns-01 \
+  --server https://acme-v02.api.letsencrypt.org/directory \
+  --dns-cloudflare-propagation-seconds 60
 
 docker run \
   --detach \
