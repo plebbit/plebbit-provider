@@ -62,7 +62,7 @@ curl https://ipfs.io/ipns/12D3KooWG3XbzoVyAE6Y9vHZKF64Yuuu4TjdgQKedk14iYmTEPWu
   - Add record: Type: `A`, Name: `*.ipns`, IPv4 address: `<ip-of-your-server>`, Proxy status: `unchecked (DNS only)`, TTL: `Auto`
   - Save
 
-2. Create a cloudflare api token
+2. Create a cloudflare API token
   - Go to https://dash.cloudflare.com/profile/api-tokens
   - Choose "Edit zone DNS"
   - Under "Zone Resources", select your domain name
@@ -70,7 +70,7 @@ curl https://ipfs.io/ipns/12D3KooWG3XbzoVyAE6Y9vHZKF64Yuuu4TjdgQKedk14iYmTEPWu
 
 3. Run the SSL certificate script (certbot)
   - Open the script `scripts/start-certbot-docker.sh` in a file editor (e.g. `nano scripts/start-certbot-docker.sh`)
-  - Edit the variables `CLOUDFLARE_API_TOKEN=`, `CERT_EMAIL=`, and `DOMAIN=` and save the file
+  - Edit the variables `CLOUDFLARE_API_TOKEN=`, `CERT_EMAIL=` (any valid email), and `DOMAIN=` and save the file
   - Run the script `scripts/start-certbot-docker.sh`
   - Check the output to see if it succeeded
 
