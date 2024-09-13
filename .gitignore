@@ -9,6 +9,8 @@ chrome-profile
 basic-auth.js
 bin
 .ipfs
+letsencrypt
+cloudflare
 
 # Logs
 logs
