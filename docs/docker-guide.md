@@ -1,6 +1,9 @@
 #### 1. Install Docker
 
-- https://docs.docker.com/engine/install/ubuntu/
+```
+sudo apt update && sudo apt install docker.io
+```
+- if that doesn't work, try https://docs.docker.com/engine/install/ubuntu/
 
 #### 2. Clone the repo
 
