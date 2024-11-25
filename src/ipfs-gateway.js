@@ -56,7 +56,6 @@ const proxyIpfsGateway = async (proxy, req, res) => {
   const subdomains = req.headers.host?.split('.') || []
   // if is subdomain redirect, redirect right away
   if (ipfsGatewayUseSubdomains && (subdomains[1] !== 'ipfs' && subdomains[1] !== 'ipns')) {
-    rewriteHeaders['cache-control'] = 'public, max-age=31536000, immutable'
     proxy.web(req, res, {
       target: ipfsGatewayUrl, 
       headers: rewriteHeaders, // rewrite host header to match kubo Gateway.PublicGateways config
@@ -122,18 +121,6 @@ const proxyIpfsGateway = async (proxy, req, res) => {
     res.statusCode = 403
     res.end(plebbitErrorMessage)
     return
-  }
-
-  // set custom cache if request is successful
-  if (fetched?.status < 300) {
-    if (ipnsName) {
-      // the ipns expires after 1 minutes (60 seconds), must revalidate if expired
-      rewriteHeaders['cache-control'] = 'public, max-age=60, must-revalidate'
-    }
-    else {
-      // the ipfs is immutable, so set the cache a long time
-      rewriteHeaders['cache-control'] = 'public, max-age=31536000, immutable'
-    }
   }
 
   proxy.web(req, res, {
