@@ -2,7 +2,7 @@ require('dotenv').config()
 const envHttpRouterUrls = process.env.HTTP_ROUTER_URLS ? process.env.HTTP_ROUTER_URLS.split(',').map(url => url.trim()) : []
 const Debug = require('debug')
 const debugIpfs = require('debug')('plebbit-provider:ipfs')
-const {execSync, spawnSync, exec} = require('child_process')
+const {execSync, exec} = require('child_process')
 const path = require('path')
 const ipfsBinaryPath = path.join(__dirname, '..', 'bin', 'ipfs')
 const ipfsDataPath = path.resolve(__dirname, '..', '.ipfs')
@@ -13,8 +13,21 @@ const ProgressBar = require('progress')
 const decompress = require('decompress')
 const ipfsGatewayUseSubdomains = process.argv.includes('--ipfs-gateway-use-subdomains')
 
+const architecture = require('os').arch()
+let ipfsClientArchitecture
+if (architecture === 'ia32') {
+  ipfsClientArchitecture = '386'
+} else if (architecture === 'x64') {
+  ipfsClientArchitecture = 'amd64'
+} else if (architecture === 'arm64') {
+  ipfsClientArchitecture = 'arm64'
+} else if (architecture === 'arm') {
+  ipfsClientArchitecture = 'arm'
+} else {
+  throw Error(`ipfs doesn't support architecture '${architecture}'`)
+}
 const ipfsClientVersion = '0.32.1'
-const ipfsClientLinuxUrl = `https://dist.ipfs.io/kubo/v${ipfsClientVersion}/kubo_v${ipfsClientVersion}_linux-amd64.tar.gz`
+const ipfsClientLinuxUrl = `https://dist.ipfs.io/kubo/v${ipfsClientVersion}/kubo_v${ipfsClientVersion}_linux-${ipfsClientArchitecture}.tar.gz`
 
 // list of http routers to use
 const httpRouterUrls = [
@@ -29,7 +42,7 @@ const httpRouterUrls = [
     console.log('downloading ipfs... might take a few minutes')
     await downloadIpfs()
   }
-  const versionMessage = spawnSync(ipfsBinaryPath, ['version']).stdout.toString().trim()
+  const versionMessage = execSync(`${ipfsBinaryPath} version`, {env, encoding: 'utf-8'}).trim()
   if (!versionMessage.includes(ipfsClientVersion)) {
     console.log(`${versionMessage}, downloading version ${ipfsClientVersion}... might take a few minutes`)
     fs.removeSync(ipfsBinaryPath)
