@@ -20,5 +20,10 @@ SCRIPT="
 docker logs --follow -n 100 plebbit-provider
 "
 
+# logs with timestamp example
+# SCRIPT="
+# docker logs --since 2024-11-30T12:00:23.495Z --until 2024-12-01T00:00:23.495Z plebbit-provider
+# "
+
 # execute script over ssh
 echo "$SCRIPT" | sshpass -p "$DEPLOY_PASSWORD" ssh "$DEPLOY_USER"@"$DEPLOY_HOST"
