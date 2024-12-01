@@ -11,7 +11,7 @@ docker run \
   --workdir=/usr/src/plebbit-provider \
   --name plebbit-provider \
   --restart always \
-  --log-opt max-size=10m \
+  --log-opt max-size=20m \
   --log-opt max-file=5 \
   --publish 8000:8000 \
   --publish 80:80 \
