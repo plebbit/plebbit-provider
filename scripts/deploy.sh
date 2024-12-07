@@ -17,7 +17,6 @@ if [ -z "${DEPLOY_USER+xxx}" ]; then echo "DEPLOY_USER not set" && exit; fi
 if [ -z "${DEPLOY_PASSWORD+xxx}" ]; then echo "DEPLOY_PASSWORD not set" && exit; fi
 
 SCRIPT="
-docker rm -f plebbit-provider 2>/dev/null
 cd /home
 git clone https://github.com/plebbit/plebbit-provider.git
 cd plebbit-provider

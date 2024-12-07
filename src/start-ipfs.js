@@ -160,10 +160,10 @@ async function startIpfs() {
   ipfsProcess.on('error', console.error)
   ipfsProcess.on('exit', () => {
     console.error(`ipfs process with pid ${ipfsProcess.pid} exited`)
-    process.exit(1)
+    // process.exit(1)
   })
   process.on("exit", () => {
-    exec(`kill ${ipfsProcess.pid + 1}`)
+    // exec(`kill ${ipfsProcess.pid + 1}`)
   })
 }
 

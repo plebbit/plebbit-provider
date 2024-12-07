@@ -58,7 +58,9 @@ proxy.on('proxyReq', function(proxyReq, req, res, options) {
 proxy.on('error', (e, req, res) => {
   console.error(e)
   // if not ended, will hang forever
-  res.end()
+  res.statusCode = 502
+  res.setHeader('Content-Type', 'text/plain')
+  res.end(`502 Bad Gateway: ${e.message}`)
 })
 
 const isSnsProvider = (req) => 
