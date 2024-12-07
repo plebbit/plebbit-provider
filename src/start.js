@@ -5,7 +5,7 @@ const {serverMetrics, sendMetrics} = require('./prometheus')
 const Debug = require('debug')
 const debugProxy = require('debug')('plebbit-provider:proxy')
 const debugIpfs = require('debug')('plebbit-provider:ipfs')
-Debug.enable('plebbit-provider:*,ipfs-tracker:*')
+Debug.enable('plebbit-provider:*')
 const {execSync, exec} = require('child_process')
 const ipfsBinaryPath = require('path').join(__dirname, '..', 'bin', 'ipfs')
 const fs = require('fs')
@@ -39,7 +39,6 @@ proxy.on('proxyReq', function(proxyReq, req, res, options) {
 
   // remove headers that could potentially cause an ipfs 403 error
   proxyReq.removeHeader('CF-IPCountry')
-  proxyReq.removeHeader('X-Forwarded-For')
   proxyReq.removeHeader('CF-RAY')
   proxyReq.removeHeader('X-Forwarded-Proto')
   proxyReq.removeHeader('CF-Visitor')
@@ -53,6 +52,11 @@ proxy.on('proxyReq', function(proxyReq, req, res, options) {
   proxyReq.removeHeader('referer')
   proxyReq.removeHeader('CF-Connecting-IP')
   proxyReq.removeHeader('CDN-Loop')
+
+  // ipfs tracker needs forwarded ip
+  if (!req.url.startsWith('/routing/v1/providers')) {
+    proxyReq.removeHeader('X-Forwarded-For')
+  }
 })
 
 proxy.on('error', (e, req, res) => {
