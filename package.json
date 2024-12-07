@@ -30,6 +30,7 @@
     "quick-lru": "6.1.1",
     "serve-index": "1.9.1",
     "stream-array": "1.1.2",
+    "tcp-port-used": "1.0.2",
     "telegraf": "4.8.5",
     "wait-on": "7.0.1"
   },

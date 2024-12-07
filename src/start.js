@@ -148,6 +148,12 @@ const startServer = (port) => {
       return
     }
 
+    // don't let plebbit-js call shutdown
+    if (req.url === '/api/v0/shutdown') {
+      res.end()
+      return
+    }
+
     // fix error 'has been blocked by CORS policy'
     res.setHeader('Access-Control-Allow-Origin', '*')
 

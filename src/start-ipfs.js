@@ -12,6 +12,8 @@ const https = require('https')
 const ProgressBar = require('progress')
 const decompress = require('decompress')
 const ipfsGatewayUseSubdomains = process.argv.includes('--ipfs-gateway-use-subdomains')
+const tcpPortUsed = require('tcp-port-used')
+const ps = require('process')
 
 const architecture = require('os').arch()
 let ipfsClientArchitecture
@@ -51,7 +53,33 @@ const httpRouterUrls = [
   }
 
   await initIpfs()
-  await startIpfs()
+
+  const startIpfsAutoRestart = async () => {
+    let pendingStart = false
+    const start = async () => {
+      if (pendingStart) {
+        return
+      }
+      pendingStart = true
+      try {
+        const started = await tcpPortUsed.check(5001, '127.0.0.1')
+        if (!started) {
+          await startIpfs()
+        }
+      } catch (e) {
+        console.log('failed starting ipfs', e)
+      }
+      pendingStart = false
+    }
+
+    // retry starting ipfs every 1 second,
+    // in case it was started by another client that shut down and shut down ipfs with it
+    start()
+    setInterval(() => {
+      start()
+    }, 1000)
+  }
+  startIpfsAutoRestart()
 })()
 
 async function initIpfs() {
@@ -119,17 +147,6 @@ async function initIpfs() {
       }
     }
 
-    // TODO: remove this, added dht temporarily
-    // httpRoutersConfig.Dht = {Type: 'dht', Parameters: {
-    //   Mode: 'auto',
-    //   PublicIPNetwork: true
-    // }}
-    // httpRoutersConfig.HttpRoutersParallel.Parameters.Routers.push({
-    //   RouterName: 'Dht',
-    //   IgnoreErrors : true, // If any of the routers fails, the output will be an error by default. To avoid any error at the output, you must ignore all router errors.
-    //   ExecuteAfter: '5s'
-    // })
-
     const httpRoutersMethodsConfig = {
       'find-providers': {RouterName: 'HttpRoutersParallel'},
       provide: {RouterName: 'HttpRoutersParallel'},
@@ -150,22 +167,41 @@ async function initIpfs() {
   }
 }
 
-async function startIpfs() {
-  // start ipfs daemon
+const startIpfs = () => new Promise((resolve, reject) => {
   const ipfsProcess = exec(`IPFS_PATH="${ipfsDataPath}" ${ipfsBinaryPath} daemon --migrate --enable-pubsub-experiment --enable-namesys-pubsub`)
-  console.log(`ipfs process started with pid ${ipfsProcess.pid}`)
-  ipfsProcess.stderr.on('data', console.error)
+  console.log(`ipfs daemon process started with pid ${ipfsProcess.pid}`)
+  let lastError
+  ipfsProcess.stderr.on('data', (data) => {
+    lastError = data.toString()
+    console.error(data.toString())
+  })
   ipfsProcess.stdin.on('data', debugIpfs)
-  ipfsProcess.stdout.on('data', debugIpfs)
+  ipfsProcess.stdout.on('data', (data) => {
+    data = data.toString()
+    debugIpfs(data)
+    if (data.includes('Daemon is ready')) {
+      resolve()
+    }
+  })
   ipfsProcess.on('error', console.error)
   ipfsProcess.on('exit', () => {
     console.error(`ipfs process with pid ${ipfsProcess.pid} exited`)
-    // process.exit(1)
+    reject(Error(lastError))
   })
-  process.on("exit", () => {
-    // exec(`kill ${ipfsProcess.pid + 1}`)
+  process.on('exit', () => {
+    try {
+      ps.kill(ipfsProcess.pid)
+    } catch (e) {
+      console.log(e)
+    }
+    try {
+      // sometimes ipfs doesnt exit unless we kill pid +1
+      ps.kill(ipfsProcess.pid + 1)
+    } catch (e) {
+      console.log(e)
+    }
   })
-}
+})
 
 async function downloadIpfs() {
   const downloadWithProgress = (url) =>
