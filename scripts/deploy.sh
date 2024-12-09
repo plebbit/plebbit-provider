@@ -21,7 +21,8 @@ cd /home
 git clone https://github.com/plebbit/plebbit-provider.git
 cd plebbit-provider
 git reset HEAD --hard
-git pull
+git pull --rebase
+git log -1
 "
 
 # execute script over ssh
