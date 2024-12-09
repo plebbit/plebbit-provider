@@ -54,8 +54,14 @@ proxy.on('proxyReq', function(proxyReq, req, res, options) {
   proxyReq.removeHeader('CDN-Loop')
 
   // ipfs tracker needs forwarded ip
+  // TODO: add some option to not trust x-forwarded-for, for when not using a proxy like cloudflare
   if (!req.url.startsWith('/routing/v1/providers')) {
     proxyReq.removeHeader('X-Forwarded-For')
+  }
+  else {
+    if (!req.headers['x-forwarded-for']) {
+      proxyReq.setHeader('x-forwarded-for', req.connection.remoteAddress)
+    }
   }
 })
 
