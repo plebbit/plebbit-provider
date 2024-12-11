@@ -188,7 +188,7 @@ const startIpfs = () => new Promise((resolve, reject) => {
     console.error(`ipfs process with pid ${ipfsProcess.pid} exited`)
     reject(Error(lastError))
   })
-  process.on('exit', () => {
+  const tryKill = () => {
     try {
       ps.kill(ipfsProcess.pid)
     } catch (e) {
@@ -200,7 +200,23 @@ const startIpfs = () => new Promise((resolve, reject) => {
     } catch (e) {
       console.log(e)
     }
+  }
+  process.on('exit', () => {
+    tryKill()
   })
+
+  // healthcheck on gateway, sometimes stops working and needs restart, dont know why
+  setInterval(async () => {
+    let res
+    try {
+      res = await fetch(`http://127.0.0.1:8080/ipfs/abc`).then(res => res.text())
+    }
+    catch (e) {}
+    if (!res?.match('invalid cid')) {
+      console.log(`ipfs gateway healthcheck failed, response '${res}', killing ipfs...`)
+      tryKill()
+    }
+  }, 1000 * 60)
 })
 
 async function downloadIpfs() {
