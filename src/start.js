@@ -111,6 +111,13 @@ const startServer = (port) => {
       return proxyIpfsTracker(proxy, req, res)
     }
 
+    let reqHasBasicAuth = false
+    const reqBasicAuthHeader = (req.headers.authorization || '').split(' ')[1] || ''
+    const [reqBasicAuthUsername, reqBasicAuthPassword] = Buffer.from(reqBasicAuthHeader, 'base64').toString().split(':')
+    if (basicAuthUsername && basicAuthPassword && basicAuthUsername === reqBasicAuthUsername && basicAuthPassword === reqBasicAuthPassword) {
+      reqHasBasicAuth = true
+    }
+
     // debug api for prometheus metrics https://github.com/ipfs/kubo/blob/master/docs/config.md#internalbitswap 
     // e.g. http://127.0.0.1:5001/debug/metrics/prometheus
     if (req.url.startsWith('/debug/')) {
@@ -138,12 +145,6 @@ const startServer = (port) => {
     }
 
     // ipfs api endpoints (with basic auth only)
-    let reqHasBasicAuth = false
-    const reqBasicAuthHeader = (req.headers.authorization || '').split(' ')[1] || ''
-    const [reqBasicAuthUsername, reqBasicAuthPassword] = Buffer.from(reqBasicAuthHeader, 'base64').toString().split(':')
-    if (basicAuthUsername && basicAuthPassword && basicAuthUsername === reqBasicAuthUsername && basicAuthPassword === reqBasicAuthPassword) {
-      reqHasBasicAuth = true
-    }
     if (reqHasBasicAuth) {
       debugProxy(req.method, req.url, req.rawHeaders)
       // fix error 'has been blocked by CORS policy'
