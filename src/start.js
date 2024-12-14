@@ -131,8 +131,8 @@ const startServer = (port) => {
       }
     }
 
-    // don't let plebbit-js call shutdown
-    if (req.url === '/api/v0/shutdown') {
+    // don't let plebbit-js call shutdown or change config
+    if (req.url === '/api/v0/shutdown' || req.url.startsWith('/api/v0/config')) {
       debugProxy(`forbidden url '${req.url}' 403`)
       res.statusCode = 403
       res.end()
