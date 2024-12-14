@@ -1,23 +1,17 @@
 require('dotenv').config()
 const http = require('http')
 const httpProxy = require('http-proxy')
-const {serverMetrics, sendMetrics} = require('./prometheus')
 const Debug = require('debug')
 const debugProxy = require('debug')('plebbit-provider:proxy')
-const debugIpfs = require('debug')('plebbit-provider:ipfs')
 Debug.enable('plebbit-provider:*')
-const {execSync, exec} = require('child_process')
-const ipfsBinaryPath = require('path').join(__dirname, '..', 'bin', 'ipfs')
-const fs = require('fs')
-const {URL} = require('url')
-const pubsubLogs = process.argv.includes('--pubsub-logs')
-if (pubsubLogs) {
-  const {proxyLogs} = require('./start-logs')
-}
-const {proxySnsProvider} = require('./sns-provider')
+
+// routes
+const {serverMetrics, sendMetrics} = require('./prometheus')
+const {proxySnsProvider, isSnsProvider} = require('./sns-provider')
 const {proxyEnsProvider} = require('./ens-provider')
 const {proxyIpfsGateway, rewriteIpfsGatewaySubdomainsHost} = require('./ipfs-gateway')
 const {proxyIpfsTracker} = require('./ipfs-tracker')
+const {proxyPubsubProvider} = require('./pubsub-provider')
 
 // use basic auth to have access to any ipfs api and /debug/, not just pubsub
 const basicAuthUsername = process.env.BASIC_AUTH_USERNAME
@@ -73,11 +67,6 @@ proxy.on('error', (e, req, res) => {
   res.end(`502 Bad Gateway: ${e.message}`)
 })
 
-const isSnsProvider = (req) => 
-  req.url === '/' 
-  && (req.method === 'POST' || req.method === 'OPTIONS')
-  && (req.headers['access-control-request-headers']?.includes('solana-client') || req.headers['solana-client'])
-
 // start server
 const startServer = (port) => {
   const server = http.createServer()
@@ -122,22 +111,6 @@ const startServer = (port) => {
       return proxyIpfsTracker(proxy, req, res)
     }
 
-    // logs endpoints
-    if (pubsubLogs && req.url.startsWith('/logs')) {
-      return proxyLogs(proxy, req, res)
-    }
-
-    // start of pubsub related endpoints
-    debugProxy(req.method, req.url, req.rawHeaders)
-
-    // basic auth allows any api
-    let reqHasBasicAuth = false
-    const reqBasicAuthHeader = (req.headers.authorization || '').split(' ')[1] || ''
-    const [reqBasicAuthUsername, reqBasicAuthPassword] = Buffer.from(reqBasicAuthHeader, 'base64').toString().split(':')
-    if (basicAuthUsername && basicAuthPassword && basicAuthUsername === reqBasicAuthUsername && basicAuthPassword === reqBasicAuthPassword) {
-      reqHasBasicAuth = true
-    }
-
     // debug api for prometheus metrics https://github.com/ipfs/kubo/blob/master/docs/config.md#internalbitswap 
     // e.g. http://127.0.0.1:5001/debug/metrics/prometheus
     if (req.url.startsWith('/debug/')) {
@@ -150,24 +123,39 @@ const startServer = (port) => {
       }
     }
 
-    // no basic auth allows only pubsub api
-    else if (!reqHasBasicAuth && !req.url.startsWith('/api/v0/pubsub/pub') && !req.url.startsWith('/api/v0/pubsub/sub')) {
-      debugProxy(`bad url '${req.url}' 403`)
+    // don't let plebbit-js call shutdown
+    if (req.url === '/api/v0/shutdown') {
+      debugProxy(`forbidden url '${req.url}' 403`)
       res.statusCode = 403
       res.end()
       return
     }
 
-    // don't let plebbit-js call shutdown
-    if (req.url === '/api/v0/shutdown') {
-      res.end()
+    // pubsub endpoints
+    if (req.url.startsWith('/api/v0/pubsub/pub') || req.url.startsWith('/api/v0/pubsub/sub')) {
+      proxyPubsubProvider(req, res)
       return
     }
 
-    // fix error 'has been blocked by CORS policy'
-    res.setHeader('Access-Control-Allow-Origin', '*')
+    // ipfs api endpoints (with basic auth only)
+    let reqHasBasicAuth = false
+    const reqBasicAuthHeader = (req.headers.authorization || '').split(' ')[1] || ''
+    const [reqBasicAuthUsername, reqBasicAuthPassword] = Buffer.from(reqBasicAuthHeader, 'base64').toString().split(':')
+    if (basicAuthUsername && basicAuthPassword && basicAuthUsername === reqBasicAuthUsername && basicAuthPassword === reqBasicAuthPassword) {
+      reqHasBasicAuth = true
+    }
+    if (reqHasBasicAuth) {
+      debugProxy(req.method, req.url, req.rawHeaders)
+      // fix error 'has been blocked by CORS policy'
+      res.setHeader('Access-Control-Allow-Origin', '*')
+      proxy.web(req, res, {target: 'http://127.0.0.1:5001'})
+      return
+    }
 
-    proxy.web(req, res, {target: 'http://127.0.0.1:5001'})
+    // no matches to proxy
+    debugProxy(`bad url '${req.url}' 403`)
+    res.statusCode = 403
+    res.end()
   })
   server.on('error', console.error)
   server.listen(port)

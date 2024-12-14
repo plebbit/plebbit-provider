@@ -178,4 +178,9 @@ const proxySnsProvider = (proxy, req, res) => {
   proxy.web(req, res, {target: `http://127.0.0.1:${port}`})
 }
 
-module.exports = {proxySnsProvider}
+const isSnsProvider = (req) => 
+  req.url === '/' 
+  && (req.method === 'POST' || req.method === 'OPTIONS')
+  && (req.headers['access-control-request-headers']?.includes('solana-client') || req.headers['solana-client'])
+
+module.exports = {proxySnsProvider, isSnsProvider}
