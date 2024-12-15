@@ -1,19 +1,17 @@
 {
-  "name": "pubsub-provider",
+  "name": "plebbit-provider",
   "version": "1.0.0",
   "description": "",
   "main": "./src/start.js",
   "scripts": {
     "start": "node src/start",
     "test": "mocha test/**/*.test.js",
-    "test:browser": "karma start config/karma.conf.js",
-    "remote-listen-subplebbits": "while true; do node test/test-remote-listen-subplebbits; sleep 1; done",
-    "monitor": "while true; do node scripts/monitor; sleep 1; done"
+    "test:browser": "karma start config/karma.conf.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@plebbit/ipfs-tracker": "https://github.com/plebbit/ipfs-tracker.git#3b22d58ae9b28bcae199dd7d75e9d753d4ece4b2",
+    "@plebbit/ipfs-tracker": "https://github.com/plebbit/ipfs-tracker.git#5c0ce7938b74fba76425069dea02e6aef8532297",
     "cborg": "2.0.3",
     "debug": "4.3.4",
     "decompress": "4.2.1",
@@ -33,7 +31,7 @@
     "tcp-port-used": "1.0.2",
     "telegraf": "4.8.5",
     "uint8arrays": "3.0.0",
-       "wait-on": "7.0.1"
+    "wait-on": "7.0.1"
   },
   "devDependencies": {
     "buffer": "6.0.3",
