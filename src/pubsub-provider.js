@@ -11,8 +11,13 @@ const {request: httpRequest} = proxyTarget.protocol === 'https:' ? https : http
 const proxyPubsubProvider = (req, res) => {
   debug(req.method, req.url, req.rawHeaders)
 
-  // remove headers that could potentially cause an ipfs 403 error
   const reqHeaders = {...req.headers}
+
+  // delete proxying related headers
+  delete reqHeaders['host']
+  delete reqHeaders['connection']
+
+  // remove headers that could potentially cause an ipfs 403 error
   delete reqHeaders['cf-ipcountry']
   delete reqHeaders['cf-ray']
   delete reqHeaders['x-forwarded-proto']
@@ -36,20 +41,26 @@ const proxyPubsubProvider = (req, res) => {
     headers: reqHeaders
   }
   const proxyReq = httpRequest(requestOptions, (proxyRes) => {
+    proxyRes.on('error', (e) => {
+      debug('proxy res error:', e.message)
+      res.writeHead(502)
+      res.end(`Bad Gateway: ${e.message}`)
+    })
+
     // fix error 'has been blocked by CORS policy'
     const resHeaders = {...proxyRes.headers}
     resHeaders['access-control-allow-origin'] = '*'
 
     res.writeHead(proxyRes.statusCode, resHeaders)
-    res.write('') // needed to send http headers right away, without it kubo.pubsub.subscribe onError not triggered
+    res.flushHeaders() // send http headers right away, without it kubo.pubsub.subscribe onError not triggered
     proxyRes.pipe(res, {end: true})
   })
   proxyReq.on('error', (e) => {
-    debug('proxy error:', e.message)
+    debug('proxy req error:', e.message)
     res.writeHead(500)
-    res.end('Internal Server Error')
+    res.end(`Internal Server Error: ${e.message}`)
   })
-  proxyReq.end()
+  req.pipe(proxyReq)
 }
 
 module.exports = {proxyPubsubProvider}
