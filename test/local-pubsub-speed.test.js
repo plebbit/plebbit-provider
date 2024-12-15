@@ -1,4 +1,4 @@
-const IpfsHttpClient = require('ipfs-http-client')
+const IpfsHttpClient = require('kubo-rpc-client')
 const {toString} = require('uint8arrays/to-string')
 const {Buffer} = require('buffer')
 

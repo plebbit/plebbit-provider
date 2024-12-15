@@ -1,4 +1,4 @@
-const IpfsHttpClient = require('ipfs-http-client')
+const IpfsHttpClient = require('kubo-rpc-client')
 const https = require('https')
 const ProxyAgent = require('https-proxy-agent')
 const {toString} = require('uint8arrays/to-string')
