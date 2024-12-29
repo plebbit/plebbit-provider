@@ -10,7 +10,7 @@ node start [--ipfs-gateway-use-subdomains] [--shutdown-key <secret-key>]
 #### Install and start with Docker
 
 ```sh
-./start-docker.sh [--ipfs-gateway-use-subdomains] [--shutdown-key <secret-key>] 
+./start-docker.sh
 ```
 
 #### Guides
