@@ -1,5 +1,7 @@
 const fetch = require('node-fetch')
 const debugGateway = require('debug')('plebbit-provider:ipfs-gateway')
+
+// cli args
 const ipfsGatewayUseSubdomains = process.argv.includes('--ipfs-gateway-use-subdomains')
 
 const maxSize = 1048576

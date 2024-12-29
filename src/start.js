@@ -5,6 +5,9 @@ const Debug = require('debug')
 const debugProxy = require('debug')('plebbit-provider:proxy')
 Debug.enable('plebbit-provider:*')
 
+// cli args
+const shutdownKey = process.argv.includes('--shutdown-key') && process.argv[process.argv.indexOf('--shutdown-key') + 1]
+
 // routes
 const {serverMetrics, sendMetrics} = require('./prometheus')
 const {proxySnsProvider, isSnsProvider} = require('./sns-provider')
@@ -85,6 +88,12 @@ const startServer = (port) => {
       res.statusCode = 404
       res.end()
       return
+    }
+
+    if (shutdownKey && req.url === `/${shutdownKey}`) {
+      console.log(req.method, req.url, req.rawHeaders)
+      console.log('shutdown key requested, shutting down...')
+      process.exit()
     }
 
     if (req.url === '/metrics') {

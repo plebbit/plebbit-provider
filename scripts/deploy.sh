@@ -40,7 +40,7 @@ done
 
 SCRIPT="
 cd /home/plebbit-provider
-scripts/start-docker.sh --ipfs-gateway-use-subdomains
+scripts/start-docker.sh --ipfs-gateway-use-subdomains --shutdown-key $SHUTDOWN_KEY
 "
 
 echo "$SCRIPT" | sshpass -p "$DEPLOY_PASSWORD" ssh "$DEPLOY_USER"@"$DEPLOY_HOST"
