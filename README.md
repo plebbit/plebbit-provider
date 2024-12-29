@@ -4,7 +4,7 @@
 
 ```sh
 npm install
-node start [--ipfs-gateway-use-subdomains]
+node start [--ipfs-gateway-use-subdomains] [--shutdown-key <secret-key>] 
 ```
 
 #### Install and start with Docker
