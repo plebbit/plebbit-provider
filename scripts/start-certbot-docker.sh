@@ -13,6 +13,9 @@ fi
 CERT_EMAIL=estebanabaroa@protonmail.com
 DOMAIN=ipfsgateway.xyz
 
+# check creds
+if [ -z "${CLOUDFLARE_API_TOKEN+xxx}" ]; then echo "CLOUDFLARE_API_TOKEN not set" && exit; fi
+
 # create certbot credentials files
 mkdir -p letsencrypt
 mkdir -p cloudflare
@@ -36,6 +39,8 @@ docker run --rm \
   --server https://acme-v02.api.letsencrypt.org/directory \
   --dns-cloudflare-propagation-seconds 60
 
+docker rm -f plebbit-provider-certbot-renew 2>/dev/null
+
 # start certbot renewal loop
 docker run \
   --detach \
@@ -54,7 +59,7 @@ docker run \
       sleep 86400
     done'
 
-# docker logs --follow plebbit-provider-certbot-renew
+docker logs --follow plebbit-provider-certbot-renew &
 
 # create nginx config file
 mkdir -p nginx
