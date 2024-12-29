@@ -90,6 +90,7 @@ const startServer = (port) => {
       return
     }
 
+    // secret shutdown endpoint, useful for healthcheck restarts
     if (shutdownKey && req.url === `/${shutdownKey}`) {
       console.log(req.method, req.url, req.rawHeaders)
       console.log('shutdown key requested, shutting down...')
