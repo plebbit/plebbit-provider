@@ -35,6 +35,8 @@ const ipfsClientLinuxUrl = `https://dist.ipfs.io/kubo/v${ipfsClientVersion}/kubo
 const httpRouterUrls = [
   'https://routing.lol',
   'https://peers.pleb.bot',
+  'https://peers.plebpubsub.xyz',
+  'https://peers.forumindex.com',
   ...envHttpRouterUrls,
 ]
 
