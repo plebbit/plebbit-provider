@@ -26,7 +26,8 @@ const allowedAddresses = new Set([
   // ENSRegistryWithFallback (used by ethers.js)
   '0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e',
   // UniversalResolver (used by viem)
-  '0xc0497e381f536be9ce14b0dd3817cbcae57d2f62'
+  '0xc0497e381f536be9ce14b0dd3817cbcae57d2f62',
+  '0xce01f8eee7e479c928f8919abd53e553a36cef67',
 ])
 
 const plebbitErrorMessage = 'this eth rpc only serves plebbit content'
