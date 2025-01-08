@@ -83,7 +83,6 @@ proxy.on('proxyRes', async (proxyRes, req, res) => {
       const resBody = chunks.join('')
       if (!resBody.includes('"error":')) { // shouldn't happen with res.statusCode === 200, but just in case
         const reqBody = req.jsonBody.replace(/,"id":[^,]*/, '') // remove id field or caching wont work
-        console.log(res.statusCode, {resBody})
         cache?.set(reqBody, resBody)
       }
     }
