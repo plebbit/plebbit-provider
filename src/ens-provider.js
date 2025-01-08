@@ -5,6 +5,8 @@ const Debug = require('debug')
 const debug = Debug('plebbit-provider:ens-provider')
 const streamify = require('stream-array')
 
+const cacheMaxAge = 1000 * 60 * 5
+
 const chainProviderUrl = process.env.ETH_PROVIDER_URL
 let chainProvider
 try {
@@ -35,7 +37,7 @@ const noChainProviderUrlErrorMessage = `env variable 'ETH_PROVIDER_URL' not defi
 
 let cache
 import('quick-lru').then(QuickLRU => {
-  cache = new QuickLRU.default({maxSize: 10000, maxAge: 1000 * 60 * 5})
+  cache = new QuickLRU.default({maxSize: 10000, maxAge: cacheMaxAge})
 })
 
 // start proxy
@@ -75,13 +77,18 @@ proxy.on('error', (e, req, res) => {
 })
 proxy.on('proxyRes', async (proxyRes, req, res) => {
   // cache response
-  try {
-    const chunks = await getBodyChunks(proxyRes)
-    const resBody = chunks.join('')
-    const reqBody = req.jsonBody.replace(/,"id":[^,]*/, '') // remove id field or caching wont work
-    cache?.set(reqBody, resBody)
+  if (res.statusCode === 200) {
+    try {
+      const chunks = await getBodyChunks(proxyRes)
+      const resBody = chunks.join('')
+      if (!resBody.includes('"error":')) { // shouldn't happen with res.statusCode === 200, but just in case
+        const reqBody = req.jsonBody.replace(/,"id":[^,]*/, '') // remove id field or caching wont work
+        console.log(res.statusCode, {resBody})
+        cache?.set(reqBody, resBody)
+      }
+    }
+    catch (e) {}
   }
-  catch (e) {}
 })
 proxy.on('upgrade', (req, socket, head) => {
   // proxy.ws(req, socket, head)
