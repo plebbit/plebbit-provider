@@ -91,7 +91,7 @@ const proxyIpfsGateway = async (proxy, req, res) => {
   let fetched, text, error, json
   try {
     if (ipnsName) {
-      const fetched = await fetchWithTimeout(`${ipfsApiUrl}/name/resolve?arg=${ipnsName}`, {method: 'POST'})
+      const fetched = await fetchWithTimeout(`${ipfsApiUrl}/name/resolve?arg=${ipnsName}&nocache=true`, {method: 'POST'})
       const text = await fetched.text()
       try {
         cid = JSON.parse(text).Path.split('/')[2]
