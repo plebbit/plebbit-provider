@@ -12,6 +12,7 @@ const shutdownKey = process.argv.includes('--shutdown-key') && process.argv[proc
 const {serverMetrics, sendMetrics} = require('./prometheus')
 const {proxySnsProvider, isSnsProvider} = require('./sns-provider')
 const {proxyEnsProvider} = require('./ens-provider')
+const {proxyEnsProviderWs} = require('./ens-provider-ws')
 const {proxyIpfsGateway, rewriteIpfsGatewaySubdomainsHost} = require('./ipfs-gateway')
 const {proxyIpfsTracker} = require('./ipfs-tracker')
 const {proxyPubsubProvider} = require('./pubsub-provider')
@@ -77,6 +78,11 @@ const startServer = (port) => {
 
   // never timeout the keep alive connection
   server.keepAliveTimeout = 0
+
+  server.on('upgrade', (req, socket, head) => {
+    // .eth provider websocket
+    return proxyEnsProviderWs(req, socket, head)
+  })
 
   server.on('request', async (req, res) => {
     // rewrite ipfs gateway to be subdomain for testing
