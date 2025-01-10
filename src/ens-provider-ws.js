@@ -3,7 +3,7 @@ const WebSocket = require('ws')
 const net = require('net')
 const Debug = require('debug')
 const debug = Debug('plebbit-provider:ens-provider-ws')
-const {proxyEnsProvider, allowedMethods, allowedAddresses} = require('./ens-provider')
+const {allowedMethods, allowedAddresses} = require('./ens-provider')
 
 const cacheMaxAge = 1000 * 60 * 5
 const port = 29425
