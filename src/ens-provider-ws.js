@@ -3,6 +3,7 @@ const WebSocket = require('ws')
 const net = require('net')
 const Debug = require('debug')
 const debug = Debug('plebbit-provider:ens-provider-ws')
+const {proxyEnsProvider, allowedMethods, allowedAddresses} = require('./ens-provider')
 
 const cacheMaxAge = 1000 * 60 * 5
 const port = 29425
@@ -49,6 +50,7 @@ const startWebSockerServer = () => {
     }
     catch (e) {
       debug(`couldn't parse chain provider websocket message: '${message}'`)
+      return
     }
     debug('received from chain provider', jsonMessage)
 
@@ -76,6 +78,12 @@ const startWebSockerServer = () => {
       }
       catch (e) {
         debug(`couldn't parse websocket client message: '${message}'`)
+        return
+      }
+
+      if (!allowedMethods.has(jsonMessage.method) || !allowedAddresses.has(jsonMessage.params[0]?.to?.toLowerCase?.())) {
+        debug('received from websocket client', jsonMessage, 'forbidden')
+        return
       }
 
       const cacheKey = message.replace(/,"id":[^,]*/, '') // remove id field or caching wont work
