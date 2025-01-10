@@ -135,12 +135,10 @@ const proxyEnsProviderWs = (req, socket, head) => {
     // proxy
     socket.pipe(targetSocket).pipe(socket)
   })
-
   targetSocket.on('error', (err) => {
     console.error('proxy target error:', err)
     socket.destroy()
   })
-
   socket.on('error', (err) => {
     console.error('proxy client error:', err)
     targetSocket.destroy()
