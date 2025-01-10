@@ -31,8 +31,15 @@ const allowedAddresses = new Set([
   '0xc0497e381f536be9ce14b0dd3817cbcae57d2f62',
   '0xce01f8eee7e479c928f8919abd53e553a36cef67',
 ])
-
-const plebbitErrorMessage = 'this eth rpc only serves plebbit content'
+const plebbitErrorMessage = {
+  jsonrpc: '2.0',
+  error: {
+    code: 429,
+    event: -33200,
+    message: 'Forbidden Plebbit Content Only, Method Or Address Not Allowed',
+    details: 'This RPC serves plebbit content only. Contact RPC admin to have method or address whitelisted.'
+  }
+}
 const noChainProviderUrlErrorMessage = `env variable 'ETH_PROVIDER_URL' not defined`
 
 let cache
@@ -144,7 +151,7 @@ const startServer = (port) => {
     if (!allowedMethods.has(body.method) || !allowedAddresses.has(body.params[0]?.to?.toLowerCase?.())) {
       debug(req.method, req.url, req.headers, body, 'forbidden')
       res.statusCode = 403
-      res.end(plebbitErrorMessage)
+      res.end(JSON.stringify({...plebbitErrorMessage, id: body.id}))
       return
     }
 
@@ -202,4 +209,4 @@ const proxyEnsProvider = (proxy, req, res) => {
   proxy.web(req, res, {target: `http://127.0.0.1:${port}`})
 }
 
-module.exports = {proxyEnsProvider, allowedMethods, allowedAddresses}
+module.exports = {proxyEnsProvider, allowedMethods, allowedAddresses, plebbitErrorMessage}

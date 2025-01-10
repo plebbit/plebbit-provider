@@ -3,7 +3,7 @@ const WebSocket = require('ws')
 const net = require('net')
 const Debug = require('debug')
 const debug = Debug('plebbit-provider:ens-provider-ws')
-const {allowedMethods, allowedAddresses} = require('./ens-provider')
+const {allowedMethods, allowedAddresses, plebbitErrorMessage} = require('./ens-provider')
 
 const cacheMaxAge = 1000 * 60 * 5
 const port = 29425
@@ -83,6 +83,7 @@ const startWebSockerServer = () => {
 
       if (!allowedMethods.has(jsonMessage.method) || !allowedAddresses.has(jsonMessage.params[0]?.to?.toLowerCase?.())) {
         debug('received from websocket client', jsonMessage, 'forbidden')
+        clientSocket.send(JSON.stringify({...plebbitErrorMessage, id: jsonMessage.id}))
         return
       }
 
