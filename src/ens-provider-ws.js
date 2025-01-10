@@ -39,7 +39,7 @@ const startWebSockerServer = () => {
     debug('disconnected from chain provider websocket')
   })
   chainProviderSocket.on('error', (error) => {
-    debug('chain provider websocket error:', error)
+    console.error('chain provider websocket error:', error)
   })
   const onChainProviderMessage = {}
   chainProviderSocket.on('message', (message) => {
@@ -65,7 +65,7 @@ const startWebSockerServer = () => {
     port, 
     maxPayload: 100000 // 100kb
   })
-  debug(`ens websocket proxy server listening on port ${port}`)
+  console.log(`ens websocket proxy server listening on port ${port}`)
 
   let nextJsonRpcId = 0
   server.on('connection', (clientSocket) => {
@@ -118,7 +118,7 @@ const startWebSockerServer = () => {
       debug('websocket client disconnected')
     })
     clientSocket.on('error', (error) => {
-      debug('websocket client error:', error)
+      console.error('websocket client error:', error)
     })
   })
 }
@@ -137,7 +137,7 @@ const proxyEnsProviderWs = (req, socket, head) => {
   })
 
   targetSocket.on('error', (err) => {
-    debug('proxy target error:', err)
+    console.error('proxy target error:', err)
     socket.destroy()
   })
 
