@@ -219,6 +219,19 @@ const startIpfs = () => new Promise((resolve, reject) => {
       tryKill()
     }
   }, 1000 * 60)
+
+  // healthcheck on kubo rpc, sometimes stops working and needs restart, dont know why
+  setInterval(async () => {
+    let res
+    try {
+      res = await fetch(`http://127.0.0.1:5001/api/v0/config/show`, {method: 'POST'}).then(res => res.json())
+    }
+    catch (e) {}
+    if (!res?.Identity) {
+      console.log(`kubo rpc healthcheck failed, response '${JSON.stringify(res)}', killing ipfs...`)
+      tryKill()
+    }
+  }, 1000 * 60)
 })
 
 async function downloadIpfs() {
