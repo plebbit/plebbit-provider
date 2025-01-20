@@ -75,7 +75,9 @@ const startWebSockerServer = () => {
 
   let nextJsonRpcId = 0
   server.on('connection', (clientSocket, req) => {
-    debug('websocket client connected', req.socket.remoteAddress)
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
+
+    debug('websocket client connected', ip)
     clientSocket.on('message', (message) => {
       message = message.toString()
       let jsonMessage
@@ -95,7 +97,7 @@ const startWebSockerServer = () => {
 
       const cacheKey = message.replace(/,"id":[^,]*/, '') // remove id field or caching wont work
       const cached = cache?.get(cacheKey)
-      debug('received from websocket client', jsonMessage, {cached: !!cached, chainProviderSocketState: getChainProviderSocketState()}, req.socket.remoteAddress)
+      debug('received from websocket client', jsonMessage, {cached: !!cached, chainProviderSocketState: getChainProviderSocketState()}, ip)
       if (cached) {
         clientSocket.send(JSON.stringify({...cached, id: jsonMessage.id}))
         return
@@ -121,10 +123,10 @@ const startWebSockerServer = () => {
       }, 1000 * 60 * 10)
     })
     clientSocket.on('close', () => {
-      debug('websocket client disconnected', req.socket.remoteAddress)
+      debug('websocket client disconnected', ip)
     })
     clientSocket.on('error', (error) => {
-      console.error('websocket client error:', error, req.socket.remoteAddress)
+      console.error('websocket client error:', error, ip)
     })
   })
 }
