@@ -4,11 +4,16 @@ const net = require('net')
 const Debug = require('debug')
 const debug = Debug('plebbit-provider:ens-provider-ws')
 const {allowedMethods, allowedAddresses, plebbitErrorMessage} = require('./ens-provider')
-const cache = require('./ens-cache')
 
+const cacheMaxAge = 1000 * 60 * 5
 const port = 29425
 
 const chainProviderUrl = process.env.ETH_PROVIDER_URL_WS
+
+let cache
+import('quick-lru').then(QuickLRU => {
+  cache = new QuickLRU.default({maxSize: 10000, maxAge: cacheMaxAge})
+})
 
 const startWebSockerServer = () => {
   if (!chainProviderUrl) {
