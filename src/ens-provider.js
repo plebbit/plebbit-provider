@@ -4,8 +4,7 @@ require('dotenv').config()
 const Debug = require('debug')
 const debug = Debug('plebbit-provider:ens-provider')
 const streamify = require('stream-array')
-
-const cacheMaxAge = 1000 * 60 * 5
+const cache = require('./ens-cache')
 
 const chainProviderUrl = process.env.ETH_PROVIDER_URL
 let chainProvider
@@ -41,11 +40,6 @@ const plebbitErrorMessage = {
   }
 }
 const noChainProviderUrlErrorMessage = `env variable 'ETH_PROVIDER_URL' not defined`
-
-let cache
-import('quick-lru').then(QuickLRU => {
-  cache = new QuickLRU.default({maxSize: 10000, maxAge: cacheMaxAge})
-})
 
 // start proxy
 const proxy = httpProxy.createProxyServer({})
