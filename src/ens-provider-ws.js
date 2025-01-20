@@ -20,6 +20,7 @@ const startWebSockerServer = () => {
     return
   }
 
+  const onChainProviderMessage = {}
   let chainProviderSocket
   const createChainProviderSocket = () => {
     // start chain provider websocket connection
@@ -36,7 +37,6 @@ const startWebSockerServer = () => {
     chainProviderSocket.on('error', (error) => {
       console.error('chain provider websocket error:', error)
     })
-    const onChainProviderMessage = {}
     chainProviderSocket.on('message', (message) => {
       message = message.toString()
       let jsonMessage
