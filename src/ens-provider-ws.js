@@ -21,6 +21,40 @@ const startWebSockerServer = () => {
   }
 
   let chainProviderSocket
+  const createChainProviderSocket = () => {
+    // start chain provider websocket connection
+    chainProviderSocket = new WebSocket(chainProviderUrl)
+    chainProviderSocket.on('open', () => {
+      debug('connected to chain provider websocket')
+    })
+    chainProviderSocket.on('close', () => {
+      debug('disconnected from chain provider websocket, reconnecting in 5s...')
+      setTimeout(() => {
+        createChainProviderSocket()
+      }, 5000)
+    })
+    chainProviderSocket.on('error', (error) => {
+      console.error('chain provider websocket error:', error)
+    })
+    const onChainProviderMessage = {}
+    chainProviderSocket.on('message', (message) => {
+      message = message.toString()
+      let jsonMessage
+      try {
+        jsonMessage = JSON.parse(message)
+      }
+      catch (e) {
+        debug(`couldn't parse chain provider websocket message: '${message}'`)
+        return
+      }
+      debug('received from chain provider', jsonMessage)
+
+      // proxy message from chain provider to the websocket client
+      if (jsonMessage.id && onChainProviderMessage[jsonMessage.id]) {
+        onChainProviderMessage[jsonMessage.id](jsonMessage)
+      }
+    })
+  }
   const chainProviderSocketStates = {
     undefined: 'missing-chain-provider-url',
     0: 'connecting',
@@ -30,35 +64,7 @@ const startWebSockerServer = () => {
   }
   const getChainProviderSocketState = () => chainProviderSocketStates[chainProviderSocket?.readyState]
 
-  // start chain provider websocket connection
-  chainProviderSocket = new WebSocket(chainProviderUrl)
-  chainProviderSocket.on('open', () => {
-    debug('connected to chain provider websocket')
-  })
-  chainProviderSocket.on('close', () => {
-    debug('disconnected from chain provider websocket')
-  })
-  chainProviderSocket.on('error', (error) => {
-    console.error('chain provider websocket error:', error)
-  })
-  const onChainProviderMessage = {}
-  chainProviderSocket.on('message', (message) => {
-    message = message.toString()
-    let jsonMessage
-    try {
-      jsonMessage = JSON.parse(message)
-    }
-    catch (e) {
-      debug(`couldn't parse chain provider websocket message: '${message}'`)
-      return
-    }
-    debug('received from chain provider', jsonMessage)
-
-    // proxy message from chain provider to the websocket client
-    if (jsonMessage.id && onChainProviderMessage[jsonMessage.id]) {
-      onChainProviderMessage[jsonMessage.id](jsonMessage)
-    }
-  })
+  createChainProviderSocket()
 
   // start websocket server
   const server = new WebSocket.Server({
