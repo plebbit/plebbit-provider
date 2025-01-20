@@ -18,7 +18,9 @@ const allowedMethods = new Set([
   // ethers.js sometimes calls this method
   'eth_chainId', 
   // needed to resolve domains
-  'eth_call'
+  'eth_call',
+  // viem sometimes calls this method
+  'net_version'
 ])
 const allowedAddresses = new Set([
   // eth_chainId doesn't have a "to" field
