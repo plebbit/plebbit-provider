@@ -91,6 +91,16 @@ const proxyIpfsGateway = async (proxy, req, res) => {
     }
   }
 
+  if (ipnsName && ipnsCachingAndRevalidatingUntil[ipnsName] && !ipnsInvalid[ipnsName]) {
+    debugGateway(req.method, req.headers.host, req.url, 'cached, skipping validation')
+    proxy.web(req, res, {
+      target: ipfsGatewayUrl, 
+      headers: rewriteHeaders, // rewrite host header to match kubo Gateway.PublicGateways config
+      selfHandleResponse: ipfsGatewayUseSubdomains // content-type error without selfHandleResponse: true with ipfsGatewayUseSubdomains, not sure why, curl says "* Excess found in a read: excess"
+    })
+    return
+  }
+
   let fetched, text, error, json
   try {
     if (ipnsName) {
@@ -141,6 +151,7 @@ const proxyIpfsGateway = async (proxy, req, res) => {
   })
 }
 
+const ipnsInvalid = {}
 const ipnsCachingAndRevalidatingUntil = {}
 const startCachingAndRevalidatingIpns = async (ipnsName) => {
   const started = !!ipnsCachingAndRevalidatingUntil[ipnsName]
@@ -155,8 +166,14 @@ const startCachingAndRevalidatingIpns = async (ipnsName) => {
       const text = await fetched.text()
       const cid = JSON.parse(text).Path.split('/')[2]
       const cidFetched = await fetchWithTimeout(`${ipfsApiUrl}/cat?arg=${cid}&length=${maxSize}`, {method: 'POST'})
+      const json = await cidFetched.json()
+      if (!isPlebbitJson(json)) {
+        throw Error('not plebbit json')
+      }
+      delete ipnsInvalid[ipnsName]
     }
     catch (e) {
+      ipnsInvalid[ipnsName] = true
       debugGateway('failed revalidating ipns', ipnsName, e)
     }
     await new Promise((resolve) => setTimeout(resolve, ipnsRevalidateSeconds * 1000))
