@@ -22,6 +22,7 @@
     "http-proxy-agent": "5.0.0",
     "https-proxy-agent": "5.0.1",
     "kubo-rpc-client": "5.0.2",
+    "node-cache": "5.1.2",
     "p-queue": "6.6.2",
     "progress": "2.0.3",
     "prom-client": "15.1.3",

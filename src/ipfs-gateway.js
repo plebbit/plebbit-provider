@@ -13,6 +13,11 @@ const timeoutStatusText = 'Gateway Timeout'
 const ipfsApiUrl = 'http://127.0.0.1:5001/api/v0'
 const ipfsGatewayUrl = 'http://127.0.0.1:8080'
 
+const NodeCache = require('node-cache')
+const cacheSeconds = 60 * 60 // 1h
+const revalidateSeconds = 60 // 1min
+const ipnsCache = new NodeCache({stdTTL: cacheSeconds, checkperiod: cacheSeconds / 2, useClones: false})
+
 const rewriteIpfsGatewaySubdomainsHost = (proxy) => {
   // must selfHandleResponse: true even on non subdomain gateway, content-type error without it, not sure why, curl says "* Excess found in a read: excess"
   if (!ipfsGatewayUseSubdomains) {
@@ -88,6 +93,28 @@ const proxyIpfsGateway = async (proxy, req, res) => {
     }
   }
 
+  let ipnsCached
+  if (ipnsName) {
+    ipnsCached = ipnsCache.get(ipnsName)
+    if (ipnsCached) {
+      res.writeHead(200, ipnsCached.headers)
+      res.end(ipnsCached.body)
+
+      // check if it's time to revalidate
+      const cachedTtl = ipnsCache.getTtl(ipnsName)
+      let revalidateInSeconds = 0
+      if (cachedTtl) {
+        const revalidateAt = cachedTtl - ((cacheSeconds - revalidateSeconds) * 1000)
+        revalidateInSeconds = (revalidateAt - Date.now()) / 1000
+      }
+      debugGateway(req.method, req.headers.host, req.url, 'cached', `revalidate in ${revalidateInSeconds}s`)
+      // not yet time to revalidate
+      if (revalidateInSeconds > 0) {
+        return
+      }
+    }
+  }
+
   let fetched, text, error, json
   try {
     if (ipnsName) {
@@ -107,6 +134,16 @@ const proxyIpfsGateway = async (proxy, req, res) => {
   }
   catch (e) {
     error = e
+  }
+
+  // cache ipns
+  if (ipnsName && (fetched?.status === 200 && isPlebbitJson(json))) {
+    ipnsCache.set(ipnsName, {headers: Object.fromEntries(fetched.headers.entries()), body: text})
+  }
+
+  // already sent cached ipns
+  if (ipnsCached) {
+    return
   }
 
   debugGateway(req.method, req.headers.host, req.url, fetched?.status, fetched?.statusText, error?.message || '')
