@@ -13,10 +13,8 @@ const timeoutStatusText = 'Gateway Timeout'
 const ipfsApiUrl = 'http://127.0.0.1:5001/api/v0'
 const ipfsGatewayUrl = 'http://127.0.0.1:8080'
 
-const NodeCache = require('node-cache')
-const cacheSeconds = 60 * 60 // 1h
-const revalidateSeconds = 60 // 1min
-const ipnsCache = new NodeCache({stdTTL: cacheSeconds, checkperiod: cacheSeconds / 2, useClones: false})
+const ipnsCacheSeconds = 60 * 60 // 1h
+const ipnsRevalidateSeconds = 60 // 1min
 
 const rewriteIpfsGatewaySubdomainsHost = (proxy) => {
   // must selfHandleResponse: true even on non subdomain gateway, content-type error without it, not sure why, curl says "* Excess found in a read: excess"
@@ -93,28 +91,6 @@ const proxyIpfsGateway = async (proxy, req, res) => {
     }
   }
 
-  let ipnsCached
-  if (ipnsName) {
-    ipnsCached = ipnsCache.get(ipnsName)
-    if (ipnsCached) {
-      res.writeHead(200, ipnsCached.headers)
-      res.end(ipnsCached.body)
-
-      // check if it's time to revalidate
-      const cachedTtl = ipnsCache.getTtl(ipnsName)
-      let revalidateInSeconds = 0
-      if (cachedTtl) {
-        const revalidateAt = cachedTtl - ((cacheSeconds - revalidateSeconds) * 1000)
-        revalidateInSeconds = (revalidateAt - Date.now()) / 1000
-      }
-      debugGateway(req.method, req.headers.host, req.url, 'cached', `revalidate in ${revalidateInSeconds}s`)
-      // not yet time to revalidate
-      if (revalidateInSeconds > 0) {
-        return
-      }
-    }
-  }
-
   let fetched, text, error, json
   try {
     if (ipnsName) {
@@ -136,16 +112,6 @@ const proxyIpfsGateway = async (proxy, req, res) => {
     error = e
   }
 
-  // cache ipns
-  if (ipnsName && (fetched?.status === 200 && isPlebbitJson(json))) {
-    ipnsCache.set(ipnsName, {headers: Object.fromEntries(fetched.headers.entries()), body: text})
-  }
-
-  // already sent cached ipns
-  if (ipnsCached) {
-    return
-  }
-
   debugGateway(req.method, req.headers.host, req.url, fetched?.status, fetched?.statusText, error?.message || '')
 
   // request timed out
@@ -163,11 +129,39 @@ const proxyIpfsGateway = async (proxy, req, res) => {
     return
   }
 
+  // cache ipns and revalidate every revalidateSeconds
+  if (ipnsName) {
+    startCachingAndRevalidatingIpns(ipnsName)
+  }
+
   proxy.web(req, res, {
     target: ipfsGatewayUrl, 
     headers: rewriteHeaders, // rewrite host header to match kubo Gateway.PublicGateways config
     selfHandleResponse: ipfsGatewayUseSubdomains // content-type error without selfHandleResponse: true with ipfsGatewayUseSubdomains, not sure why, curl says "* Excess found in a read: excess"
   })
+}
+
+const ipnsCachingAndRevalidatingUntil = {}
+const startCachingAndRevalidatingIpns = async (ipnsName) => {
+  const started = !!ipnsCachingAndRevalidatingUntil[ipnsName]
+  ipnsCachingAndRevalidatingUntil[ipnsName] = Date.now() + (ipnsCacheSeconds * 1000) // reset cache expiry every time function is called
+  if (started) {
+    return
+  }
+
+  while (ipnsCachingAndRevalidatingUntil[ipnsName] > Date.now()) {
+    try {
+      const fetched = await fetchWithTimeout(`${ipfsApiUrl}/name/resolve?arg=${ipnsName}&nocache=true`, {method: 'POST'})
+      const text = await fetched.text()
+      const cid = JSON.parse(text).Path.split('/')[2]
+      const cidFetched = await fetchWithTimeout(`${ipfsApiUrl}/cat?arg=${cid}&length=${maxSize}`, {method: 'POST'})
+    }
+    catch (e) {
+      debugGateway('failed revalidating ipns', ipnsName, e)
+    }
+    await new Promise((resolve) => setTimeout(resolve, ipnsRevalidateSeconds * 1000))
+  }
+  delete ipnsCachingAndRevalidatingUntil[ipnsName]
 }
 
 // plebbit json either has signature or comments or allPostCount
