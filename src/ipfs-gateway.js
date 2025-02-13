@@ -140,7 +140,7 @@ const proxyIpfsGateway = async (proxy, req, res) => {
   }
 
   // cache ipns and revalidate every revalidateSeconds
-  if (ipnsName) {
+  if (ipnsName && fetched?.status === 200) {
     startCachingAndRevalidatingIpns(ipnsName)
   }
 
