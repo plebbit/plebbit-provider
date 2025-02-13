@@ -164,7 +164,13 @@ const startCachingAndRevalidatingIpns = async (ipnsName) => {
     try {
       const fetched = await fetchWithTimeout(`${ipfsApiUrl}/name/resolve?arg=${ipnsName}&nocache=true`, {method: 'POST'})
       const text = await fetched.text()
-      const cid = JSON.parse(text).Path.split('/')[2]
+      let cid
+      try {
+        cid = JSON.parse(text).Path.split('/')[2]
+      }
+      catch (e) {
+        throw Error('failed resolving ipns name')
+      }
       const cidFetched = await fetchWithTimeout(`${ipfsApiUrl}/cat?arg=${cid}&length=${maxSize}`, {method: 'POST'})
       const json = await cidFetched.json()
       if (!isPlebbitJson(json)) {
