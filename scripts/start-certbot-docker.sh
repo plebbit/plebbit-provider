@@ -95,18 +95,6 @@ http {
     access_log /var/log/nginx/access.log;
     error_log /var/log/nginx/error.log;
 
-    # serve acme http‑01 challenge
-    # not on port 80 because that's where the plebbit-provider is
-    server {
-        listen 48709;
-        listen [::]:48709;
-        server_name $DOMAIN;
-
-        location /.well-known/acme-challenge/ {
-            root /var/www/certbot;
-        }
-    }
-
     # proxy https with http2 and http3 to port 80
     server {
         listen 443 ssl;
@@ -118,11 +106,11 @@ http {
         ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
         ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
 
-        ssl_protocols TLSv1.2 TLSv1.3;
-        ssl_prefer_server_ciphers off;
+        # ssl_protocols TLSv1.2 TLSv1.3;
+        # ssl_prefer_server_ciphers off;
 
         # enable http3 / quic
-        add_header Alt-Svc 'h3-23=":443"';
+        # add_header Alt-Svc 'h3-23=":443"';
 
         location / {
             proxy_pass http://127.0.0.1:80;
@@ -131,11 +119,11 @@ http {
             proxy_set_header X-Forwarded-Proto \$scheme;
 
             # enable caching
-            proxy_cache plebbit-provider-cache;
+            # proxy_cache plebbit-provider-cache;
             # make sure subdomain is included in cache keys
-            proxy_cache_key "\$scheme\$host\$request_uri";
+            # proxy_cache_key "\$scheme\$host\$request_uri";
             # only cache if cache-control header is present
-            proxy_cache_bypass \$http_cache_control;
+            # proxy_cache_bypass \$http_cache_control;
         }
     }
 }

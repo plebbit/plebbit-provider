@@ -4,10 +4,11 @@ const path = require('path')
 const certbotPath = path.join(__dirname, '..', 'certbot-www')
 
 const proxyCerbot = async (req, res) => {
+  // decode and resolve for security
   const requestedPath = path.join('/', decodeURIComponent(req.url))
   const filePath = path.resolve(certbotPath, '.' + requestedPath)
-
   try {
+    // check resolved path for security
     if (!filePath.startsWith(certbotPath)) {
       throw Error('invalid file path')
     }
