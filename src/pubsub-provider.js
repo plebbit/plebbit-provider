@@ -21,6 +21,7 @@ const proxyPubsubProvider = (req, res) => {
   delete reqHeaders['cf-ipcountry']
   delete reqHeaders['cf-ray']
   delete reqHeaders['x-forwarded-proto']
+  delete reqHeaders['x-forwarded-for']
   delete reqHeaders['cf-visitor']
   delete reqHeaders['sec-ch-ua']
   delete reqHeaders['sec-ch-ua-mobile']
