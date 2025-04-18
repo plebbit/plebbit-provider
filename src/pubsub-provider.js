@@ -54,10 +54,6 @@ const proxyPubsubProvider = (req, res) => {
 
     res.writeHead(proxyRes.statusCode, resHeaders)
     res.flushHeaders() // send http headers right away, without it kubo.pubsub.subscribe onError not triggered
-
-    // fix issue with http2 proxies like cloudflare
-    req.on('end', () => proxyReq.end())
-
     proxyRes.pipe(res, {end: true})
   })
   proxyReq.on('error', (e) => {
@@ -65,7 +61,9 @@ const proxyPubsubProvider = (req, res) => {
     res.writeHead(500)
     res.end(`Internal Server Error: ${e.message}`)
   })
-  req.pipe(proxyReq)
+  // fix issue with http2 proxies like cloudflare
+  // req.on('end', () => proxyReq.end())
+  req.pipe(proxyReq, {end: true})
 }
 
 module.exports = {proxyPubsubProvider}
