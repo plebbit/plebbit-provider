@@ -18,7 +18,8 @@ if [ -z "${DEPLOY_PASSWORD+xxx}" ]; then echo "DEPLOY_PASSWORD not set" && exit;
 
 SCRIPT="
 docker ps
-docker logs --follow -n 100 plebbit-provider
+docker logs --follow -n 1000 plebbit-provider
+date
 "
 
 # logs with timestamp example
