@@ -53,7 +53,6 @@ const proxyPubsubProvider = (req, res) => {
     resHeaders['access-control-allow-origin'] = '*'
 
     res.writeHead(proxyRes.statusCode, resHeaders)
-    console.log(proxyRes.statusCode, resHeaders)
     res.flushHeaders() // send http headers right away, without it kubo.pubsub.subscribe onError not triggered
     proxyRes.pipe(res, {end: true})
   })
