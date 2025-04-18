@@ -1,7 +1,7 @@
 const http = require('http')
 const fs = require('fs').promises
 const path = require('path')
-const certbotPath = path.join(__dirname, 'certbot-www')
+const certbotPath = path.join(__dirname, '..', 'certbot-www')
 
 const proxyCerbot = async (req, res) => {
   const safePath = path.normalize(req.url).replace(/^(\.\.[\/\\])+/, '')
