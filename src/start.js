@@ -96,6 +96,13 @@ const startServer = (port) => {
       return
     }
 
+    // certbot nginx proxy
+    if (req.url.startsWith('/.well-known/acme-challenge')) {
+      console.log(req.method, req.url, req.rawHeaders)
+      proxy.web(req, res, {target: 'http://127.0.0.1:48709'})
+      return
+    }
+
     // secret shutdown endpoint, useful for healthcheck restarts
     if (shutdownKey && req.url === `/${shutdownKey}`) {
       res.end()

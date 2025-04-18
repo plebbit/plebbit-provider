@@ -9,46 +9,35 @@ if [ -f .env ]; then
   export $(echo $(cat .env | sed 's/#.*//g'| xargs) | envsubst)
 fi
 
-# parse args
-while [[ $# -gt 0 ]]; do
-  case $1 in
-    --domain)
-      DOMAIN="$2"
-      shift 2
-      ;;
-    --email)
-      CERT_EMAIL="$2"
-      shift 2
-      ;;
-    *)
-      echo "unknown argument: $1"
-      exit 1
-      ;;
-  esac
-done
+# CLOUDFLARE_API_TOKEN=your-cloudflare-api-token
+CERT_EMAIL=estebanabaroa@protonmail.com
+DOMAIN=ipfsgateway.xyz
 
-# validate args
-if [ -z "$DOMAIN" ] || [ -z "$CERT_EMAIL" ]; then
-  echo "Usage: $0 --domain yourdomain.com --email you@example.com"
-  exit 1
-fi
+# check creds
+if [ -z "${CLOUDFLARE_API_TOKEN+xxx}" ]; then echo "CLOUDFLARE_API_TOKEN not set" && exit; fi
+
+# create certbot credentials files
+mkdir -p letsencrypt
+mkdir -p cloudflare
+cat > $(pwd)/cloudflare/cloudflare.ini <<EOF
+dns_cloudflare_api_token = $CLOUDFLARE_API_TOKEN
+EOF
+chmod 600 cloudflare/cloudflare.ini
 
 # init certbot
-mkdir -p letsencrypt
-mkdir -p certbot-www
-
 docker run --rm \
   -v $(pwd)/letsencrypt:/etc/letsencrypt \
-  -v $(pwd)/certbot-www:/var/www/certbot \
-  certbot/certbot certonly \
-  --webroot \
-  --webroot-path /var/www/certbot \
-  -d $DOMAIN \
+  -v $(pwd)/cloudflare:/cloudflare \
+  certbot/dns-cloudflare:v2.11.0 certonly \
+  --dns-cloudflare \
+  --dns-cloudflare-credentials /cloudflare/cloudflare.ini \
+  -d *.ipfs.${DOMAIN} -d *.ipns.${DOMAIN} \
   --agree-tos \
   --non-interactive \
   --email $CERT_EMAIL \
-  --preferred-challenges http \
-  --server https://acme-v02.api.letsencrypt.org/directory
+  --preferred-challenges dns-01 \
+  --server https://acme-v02.api.letsencrypt.org/directory \
+  --dns-cloudflare-propagation-seconds 60
 
 docker rm -f plebbit-provider-certbot-renew 2>/dev/null
 
@@ -56,16 +45,16 @@ docker rm -f plebbit-provider-certbot-renew 2>/dev/null
 docker run \
   --detach \
   -v $(pwd)/letsencrypt:/etc/letsencrypt \
-  -v $(pwd)/certbot-www:/var/www/certbot \
+  -v $(pwd)/cloudflare:/cloudflare \
   --name plebbit-provider-certbot-renew \
   --restart always \
   --log-opt max-size=10m \
   --log-opt max-file=5 \
   --entrypoint "" \
-  certbot/certbot sh -c '
+  certbot/dns-cloudflare sh -c '
     while :; do
       echo "checking for certificate renewal..."
-      certbot renew --webroot --webroot-path /var/www/certbot --quiet
+      certbot renew --quiet
       echo "renewal check completed on $(date), sleeping for 1 day..."
       sleep 86400
     done'
@@ -95,17 +84,17 @@ http {
     access_log /var/log/nginx/access.log;
     error_log /var/log/nginx/error.log;
 
-    # serve acme http‑01 challenge
-    # not on port 80 because that's where the plebbit-provider is
-    server {
-        listen 48709;
-        listen [::]:48709;
-        server_name $DOMAIN;
+    # disabled since we don't run port 80 on docker
+    # redirect http to https
+    # server {
+    #     listen 80;
+    #     listen [::]:80;
+    #     server_name .$DOMAIN;
 
-        location /.well-known/acme-challenge/ {
-            root /var/www/certbot;
-        }
-    }
+    #     location / {
+    #         return 301 https://\$host\$request_uri;
+    #     }
+    # }
 
     # proxy https with http2 and http3 to port 80
     server {
@@ -113,10 +102,11 @@ http {
         listen [::]:443 ssl;
         http2 on;
 
-        server_name $DOMAIN;
+        server_name .$DOMAIN;
 
-        ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
-        ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
+        # NOTE: certbot script creates the folder at /live/ipfs.example.com, not /live/example.com
+        ssl_certificate /etc/letsencrypt/live/ipfs.$DOMAIN/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/ipfs.$DOMAIN/privkey.pem;
 
         ssl_protocols TLSv1.2 TLSv1.3;
         ssl_prefer_server_ciphers off;
@@ -143,13 +133,12 @@ EOF
 
 docker rm -f plebbit-provider-nginx-https-proxy 2>/dev/null
 
-# start nginx proxy https to http port 80 (and serve webroot)
+# start nginx proxy https to http port 80
 # -p 443:443/tcp -p 443:443/udp needed for http3 quic
 docker run \
   --detach \
   -v $(pwd)/nginx:/etc/nginx \
   -v $(pwd)/letsencrypt:/etc/letsencrypt \
-  -v $(pwd)/certbot-www:/var/www/certbot \
   --network host \
   --name plebbit-provider-nginx-https-proxy \
   --restart always \

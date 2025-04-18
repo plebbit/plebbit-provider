@@ -26,7 +26,7 @@ done
 
 # copy script files
 FILE_NAMES=(
-  start-certbot-docker.sh
+  start-certbot-docker-ipfs-subdomains.sh
 )
 for FILE_NAME in ${FILE_NAMES[@]}; do
   sshpass -p "$DEPLOY_PASSWORD" scp scripts/$FILE_NAME "$DEPLOY_USER"@"$DEPLOY_HOST":/home/plebbit-provider/scripts
@@ -34,7 +34,7 @@ done
 
 SCRIPT="
 cd /home/plebbit-provider
-scripts/start-certbot-docker.sh --domain $DOMAIN --email $CERT_EMAIL
+scripts/start-certbot-docker-ipfs-subdomains.sh
 "
 
 echo "$SCRIPT" | sshpass -p "$DEPLOY_PASSWORD" ssh "$DEPLOY_USER"@"$DEPLOY_HOST"

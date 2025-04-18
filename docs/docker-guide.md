@@ -69,9 +69,9 @@ curl https://ipfs.io/ipns/12D3KooWG3XbzoVyAE6Y9vHZKF64Yuuu4TjdgQKedk14iYmTEPWu
   - Continue
 
 3. Run the SSL certificate script (certbot)
-  - Open the script `scripts/start-certbot-docker.sh` in a file editor (e.g. `nano scripts/start-certbot-docker.sh`)
+  - Open the script `scripts/start-certbot-docker-ipfs-subdomains.sh` in a file editor (e.g. `nano scripts/start-certbot-docker-ipfs-subdomains.sh`)
   - Edit the variables `CLOUDFLARE_API_TOKEN=`, `CERT_EMAIL=` (any valid email), and `DOMAIN=` and save the file
-  - Run the script `scripts/start-certbot-docker.sh`
+  - Run the script `scripts/start-certbot-docker-ipfs-subdomains.sh`
   - Check the output to see if it succeeded
 
 4. Restart docker with the `--ipfs-gateway-use-subdomains` option
@@ -82,7 +82,7 @@ scripts/start-docker.sh --ipfs-gateway-use-subdomains
 
 5. Test that it works
   - If you run `docker ps` you should see 3 containers running `plebbit-provider`, `plebbit-provider-certbot-renew`, `plebbit-provider-nginx-https-proxy`
-  - They should autorestart, but if they don't you can start them again with `scripts/start-docker.sh --ipfs-gateway-use-subdomains` and `scripts/start-certbot-docker.sh`
+  - They should autorestart, but if they don't you can start them again with `scripts/start-docker.sh --ipfs-gateway-use-subdomains` and `scripts/start-certbot-docker-ipfs-subdomains.sh`
 
 ```sh
 curl https://k51qzi5uqu5dihlrq05s0wwl56znhdakocms4ttmb89g4zslkww5ij2wbievra.ipns.<your-domain-name>
