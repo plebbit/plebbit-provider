@@ -54,20 +54,19 @@ const proxyPubsubProvider = (req, res) => {
 
     res.writeHead(proxyRes.statusCode, resHeaders)
     res.flushHeaders() // send http headers right away, without it kubo.pubsub.subscribe onError not triggered
-    proxyRes.pipe(res, {end: true})
+
+    proxyRes.on('data', (chunk) => {
+      res.write(chunk)
+      if (res.flush) res.flush()
+    })
+    proxyRes.on('end', () => res.end())
   })
   proxyReq.on('error', (e) => {
     debug('proxy req error:', e.message)
     res.writeHead(500)
     res.end(`Internal Server Error: ${e.message}`)
   })
-
-  req.on('data', chunk => proxyReq.write(chunk))
-  req.on('end', () => proxyReq.end())
-  req.on('error', (e) => {
-    debug('req stream error:', e.message)
-    proxyReq.destroy(err)
-  })
+  req.pipe(proxyReq)
 }
 
 module.exports = {proxyPubsubProvider}
