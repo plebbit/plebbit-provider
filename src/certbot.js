@@ -11,8 +11,9 @@ const proxyCerbot = async (req, res) => {
     res.writeHead(200, {'Content-Type': 'text/plain', 'Content-Length': Buffer.byteLength(data)})
     return res.end(data)
   } catch (e) {
+    console.log(e)
     res.writeHead(404)
-    return res.end(e)
+    return res.end(String(e))
   }
 }
 
