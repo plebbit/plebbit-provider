@@ -16,6 +16,7 @@ const {proxyEnsProviderWs} = require('./ens-provider-ws')
 const {proxyIpfsGateway, rewriteIpfsGatewaySubdomainsHost} = require('./ipfs-gateway')
 const {proxyIpfsTracker} = require('./ipfs-tracker')
 const {proxyPubsubProvider} = require('./pubsub-provider')
+const {proxyCerbot} = require('./certbot')
 
 // use basic auth to have access to any ipfs api and /debug/, not just pubsub
 const basicAuthUsername = process.env.BASIC_AUTH_USERNAME
@@ -99,8 +100,7 @@ const startServer = (port) => {
     // certbot nginx proxy
     if (req.url.startsWith('/.well-known/acme-challenge')) {
       console.log(req.method, req.url, req.rawHeaders)
-      proxy.web(req, res, {target: 'http://127.0.0.1:48709'})
-      return
+      return proxyCerbot(req, res)
     }
 
     // secret shutdown endpoint, useful for healthcheck restarts
