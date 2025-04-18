@@ -62,7 +62,7 @@ const proxyPubsubProvider = (req, res) => {
     res.end(`Internal Server Error: ${e.message}`)
   })
   // fix issue with http2 proxies like cloudflare
-  // req.on('end', () => proxyReq.end())
+  req.on('end', () => proxyReq.end())
   req.pipe(proxyReq, {end: true})
 }
 
