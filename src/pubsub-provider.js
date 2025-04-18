@@ -54,6 +54,10 @@ const proxyPubsubProvider = (req, res) => {
 
     res.writeHead(proxyRes.statusCode, resHeaders)
     res.flushHeaders() // send http headers right away, without it kubo.pubsub.subscribe onError not triggered
+
+    // fix issue with http2 proxies like cloudflare
+    req.on('end', () => proxyReq.end())
+
     proxyRes.pipe(res, {end: true})
   })
   proxyReq.on('error', (e) => {
