@@ -4,9 +4,13 @@ const path = require('path')
 const certbotPath = path.join(__dirname, '..', 'certbot-www')
 
 const proxyCerbot = async (req, res) => {
-  const safePath = path.normalize(req.url).replace(/^(\.\.[\/\\])+/, '')
-  const filePath = path.join(certbotPath, safePath)
+  const requestedPath = path.join('/', decodeURIComponent(req.url))
+  const filePath = path.resolve(certbotPath, '.' + requestedPath)
+
   try {
+    if (!filePath.startsWith(certbotPath)) {
+      throw Error('invalid file path')
+    }
     const data = await fs.readFile(filePath, 'utf8')
     res.writeHead(200, {'Content-Type': 'text/plain', 'Content-Length': Buffer.byteLength(data)})
     return res.end(data)
