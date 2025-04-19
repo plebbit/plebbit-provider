@@ -33,16 +33,23 @@ curl <ip-of-your-server>:80/ipns/12D3KooWG3XbzoVyAE6Y9vHZKF64Yuuu4TjdgQKedk14iYm
 # you should receive some JSON
 ```
 
-> NOTE: if it doesn't work, maybe port 4001 isn't open on your server, tcp or udp 4001 must be open, preferably both
+> NOTE: if it doesn't work, maybe port 80 or 4001 isn't open on your server, tcp or udp 4001 must be open, preferably both
 
 #### 5. Add SSL
 
 - Buy a domain name, e.g. namecheap.com accepts BTC
 - Link your domain name with your server https://www.namecheap.com/support/knowledgebase/article.aspx/434/2237/how-do-i-set-up-host-records-for-a-domain/
-- Start certbot docker with arguments `--domain yourdomain.com --email you@example.com` (replace with your domain name and email)
+- 2 options:
+1. Start certbot docker with arguments `--domain yourdomain.com --email you@example.com` (replace with your domain name and email)
 ```sh
 scripts/start-certbot-docker.sh --domain yourdomain.com --email you@example.com
 ```
+
+or
+
+2. Add SSL to your domain using a service like cloudflare https://www.namecheap.com/support/knowledgebase/article.aspx/9607/2210/how-to-set-up-dns-records-for-your-domain-in-cloudflare-account/
+
+> NOTE: if it doesn't work, maybe port 443 isn't open on your server, also pubsub doesn't work with services like cloudflare unless "response buffering" is off, (only available on paid plan), other providers work on cloudflare.
 
 #### 5. Test that it works
 
