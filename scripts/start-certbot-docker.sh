@@ -124,6 +124,9 @@ http {
             # proxy_cache_key "\$scheme\$host\$request_uri";
             # only cache if cache-control header is present
             # proxy_cache_bypass \$http_cache_control;
+
+            # fix pubsub http2 issue
+            proxy_buffering off;
         }
     }
 }

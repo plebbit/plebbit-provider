@@ -51,16 +51,10 @@ const proxyPubsubProvider = (req, res) => {
     // fix error 'has been blocked by CORS policy'
     const resHeaders = {...proxyRes.headers}
     resHeaders['access-control-allow-origin'] = '*'
-    resHeaders['x-accel-buffering'] = 'no'
 
     res.writeHead(proxyRes.statusCode, resHeaders)
     res.flushHeaders() // send http headers right away, without it kubo.pubsub.subscribe onError not triggered
-
-    proxyRes.on('data', (chunk) => {
-      res.write(chunk)
-      if (res.flush) res.flush()
-    })
-    proxyRes.on('end', () => res.end())
+    proxyRes.pipe(res)
   })
   proxyReq.on('error', (e) => {
     debug('proxy req error:', e.message)
