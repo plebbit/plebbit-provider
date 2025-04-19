@@ -9,12 +9,33 @@ if [ -f .env ]; then
   export $(echo $(cat .env | sed 's/#.*//g'| xargs) | envsubst)
 fi
 
-# CLOUDFLARE_API_TOKEN=your-cloudflare-api-token
-CERT_EMAIL=estebanabaroa@protonmail.com
-DOMAIN=ipfsgateway.xyz
+# parse args
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --domain)
+      DOMAIN="$2"
+      shift 2
+      ;;
+    --email)
+      CERT_EMAIL="$2"
+      shift 2
+      ;;
+    --cloudflare-api-token)
+      CLOUDFLARE_API_TOKEN="$3"
+      shift 2
+      ;;
+    *)
+      echo "unknown argument: $1"
+      exit 1
+      ;;
+  esac
+done
 
-# check creds
-if [ -z "${CLOUDFLARE_API_TOKEN+xxx}" ]; then echo "CLOUDFLARE_API_TOKEN not set" && exit; fi
+# validate args
+if [ -z "$DOMAIN" ] || [ -z "$CERT_EMAIL" || [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+  echo "Usage: $0 --domain yourdomain.com --email you@example.com --cloudflare-api-token abc..."
+  exit 1
+fi
 
 # create certbot credentials files
 mkdir -p letsencrypt
@@ -83,18 +104,6 @@ http {
     # logging
     access_log /var/log/nginx/access.log;
     error_log /var/log/nginx/error.log;
-
-    # disabled since we don't run port 80 on docker
-    # redirect http to https
-    # server {
-    #     listen 80;
-    #     listen [::]:80;
-    #     server_name .$DOMAIN;
-
-    #     location / {
-    #         return 301 https://\$host\$request_uri;
-    #     }
-    # }
 
     # proxy https with http2 and http3 to port 80
     server {

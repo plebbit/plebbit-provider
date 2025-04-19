@@ -39,7 +39,10 @@ curl <ip-of-your-server>:80/ipns/12D3KooWG3XbzoVyAE6Y9vHZKF64Yuuu4TjdgQKedk14iYm
 
 - Buy a domain name, e.g. namecheap.com accepts BTC
 - Link your domain name with your server https://www.namecheap.com/support/knowledgebase/article.aspx/434/2237/how-do-i-set-up-host-records-for-a-domain/
-- Add SSL to your domain, e.g. using cloudflare https://www.namecheap.com/support/knowledgebase/article.aspx/9607/2210/how-to-set-up-dns-records-for-your-domain-in-cloudflare-account/
+- Start certbot docker with arguments `--domain yourdomain.com --email you@example.com` (replace with your domain name and email)
+```sh
+scripts/start-certbot-docker.sh --domain yourdomain.com --email you@example.com
+```
 
 #### 5. Test that it works
 
@@ -69,9 +72,7 @@ curl https://ipfs.io/ipns/12D3KooWG3XbzoVyAE6Y9vHZKF64Yuuu4TjdgQKedk14iYmTEPWu
   - Continue
 
 3. Run the SSL certificate script (certbot)
-  - Open the script `scripts/start-certbot-docker-ipfs-subdomains.sh` in a file editor (e.g. `nano scripts/start-certbot-docker-ipfs-subdomains.sh`)
-  - Edit the variables `CLOUDFLARE_API_TOKEN=`, `CERT_EMAIL=` (any valid email), and `DOMAIN=` and save the file
-  - Run the script `scripts/start-certbot-docker-ipfs-subdomains.sh`
+  - Run the script `scripts/start-certbot-docker-ipfs-subdomains.sh --domain yourdomain.com --email you@example.com --cloudflare-api-token abc...` (replace with your domain name, email and cloudflare api token)
   - Check the output to see if it succeeded
 
 4. Restart docker with the `--ipfs-gateway-use-subdomains` option
@@ -82,7 +83,7 @@ scripts/start-docker.sh --ipfs-gateway-use-subdomains
 
 5. Test that it works
   - If you run `docker ps` you should see 3 containers running `plebbit-provider`, `plebbit-provider-certbot-renew`, `plebbit-provider-nginx-https-proxy`
-  - They should autorestart, but if they don't you can start them again with `scripts/start-docker.sh --ipfs-gateway-use-subdomains` and `scripts/start-certbot-docker-ipfs-subdomains.sh`
+  - They should autorestart, but if they don't you can start them again with `scripts/start-docker.sh --ipfs-gateway-use-subdomains` and `scripts/start-certbot-docker-ipfs-subdomains.sh --domain yourdomain.com --email you@example.com --cloudflare-api-token abc...`
 
 ```sh
 curl https://k51qzi5uqu5dihlrq05s0wwl56znhdakocms4ttmb89g4zslkww5ij2wbievra.ipns.<your-domain-name>
