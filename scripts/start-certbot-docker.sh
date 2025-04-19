@@ -106,11 +106,11 @@ http {
         ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
         ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
 
-        # ssl_protocols TLSv1.2 TLSv1.3;
-        # ssl_prefer_server_ciphers off;
+        ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_prefer_server_ciphers off;
 
         # enable http3 / quic
-        # add_header Alt-Svc 'h3-23=":443"';
+        add_header Alt-Svc 'h3-23=":443"';
 
         location / {
             proxy_pass http://127.0.0.1:80;
@@ -119,11 +119,11 @@ http {
             proxy_set_header X-Forwarded-Proto \$scheme;
 
             # enable caching
-            # proxy_cache plebbit-provider-cache;
+            proxy_cache plebbit-provider-cache;
             # make sure subdomain is included in cache keys
-            # proxy_cache_key "\$scheme\$host\$request_uri";
+            proxy_cache_key "\$scheme\$host\$request_uri";
             # only cache if cache-control header is present
-            # proxy_cache_bypass \$http_cache_control;
+            proxy_cache_bypass \$http_cache_control;
 
             # fix pubsub http2 issue
             proxy_buffering off;
