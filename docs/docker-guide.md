@@ -49,7 +49,7 @@ or
 
 2. Add SSL to your domain using a service like cloudflare https://www.namecheap.com/support/knowledgebase/article.aspx/9607/2210/how-to-set-up-dns-records-for-your-domain-in-cloudflare-account/
 
-> NOTE: if it doesn't work, maybe port 443 isn't open on your server, also pubsub doesn't work with services like cloudflare unless "response buffering" is off, (only available on paid plan), other providers work on cloudflare.
+> NOTE: if it doesn't work, maybe port 443 isn't open on your server, also pubsub doesn't work with services like cloudflare unless "response buffering" is off, (only available on paid plan), other providers work with cloudflare.
 
 #### 5. Test that it works
 
