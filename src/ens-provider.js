@@ -86,7 +86,7 @@ proxy.on('error', (e, req, res) => {
 })
 proxy.on('proxyRes', async (proxyRes, req, res) => {
   // cache response
-  if (res.statusCode === 200) {
+  if (proxyRes.statusCode === 200) {
     try {
       const chunks = await getBodyChunks(proxyRes)
       const resBody = chunks.join('')
