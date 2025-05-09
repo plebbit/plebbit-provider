@@ -17,6 +17,6 @@ docker run \
   --publish 80:80 \
   --publish 4001:4001 \
   --publish 4002:4002 \
-  node:18 sh -c "npm ci && npm start -- $*"
+  node:20 sh -c "npm ci && npm start -- $*"
 
 docker logs --follow plebbit-provider

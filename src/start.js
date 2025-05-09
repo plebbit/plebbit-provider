@@ -15,6 +15,7 @@ const {proxyEnsProvider} = require('./ens-provider')
 const {proxyEnsProviderWs} = require('./ens-provider-ws')
 const {proxyIpfsGateway, rewriteIpfsGatewaySubdomainsHost} = require('./ipfs-gateway')
 const {proxyIpfsTracker} = require('./ipfs-tracker')
+const {proxyPlebbitPreviewer} = require('./plebbit-previewer')
 const {proxyPubsubProvider} = require('./pubsub-provider')
 const {proxyCerbot} = require('./certbot')
 
@@ -134,6 +135,11 @@ const startServer = (port) => {
     // ipfs tracker endpoints
     if (req.url.startsWith('/routing/v1/providers')) {
       return proxyIpfsTracker(proxy, req, res)
+    }
+
+    // plebbit previewer endpoints
+    if (req.url.startsWith('/c/') || req.url.startsWith('/p/')) {
+      return proxyPlebbitPreviewer(proxy, req, res)
     }
 
     let reqHasBasicAuth = false
