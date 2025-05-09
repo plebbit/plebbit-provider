@@ -64,6 +64,7 @@ proxy.on('proxyRes', async (proxyRes, req, res) => {
       const resBody = chunks.join('')
       if (!resBody.includes('"error":')) { // shouldn't happen with res.statusCode === 200, but just in case
         const reqBody = req.jsonBody.replace(/,"id":"[^"]*"/, '') // remove id field or caching wont work
+        JSON.parse(resBody) // validate json, sometimes bugs with invalid json
         cache?.set(reqBody, resBody)
       }
     }
