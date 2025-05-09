@@ -57,6 +57,7 @@ proxy.on('error', (e, req, res) => {
   res.end(`502 Bad Gateway: ${e.message}`)
 })
 proxy.on('proxyRes', async (proxyRes, req, res) => {
+  console.log('proxyRes.statusCode', proxyRes.statusCode)
   // cache response
   if (proxyRes.statusCode === 200) {
     try {
@@ -162,6 +163,11 @@ const port = 29554
 startServer(port)
 
 const getBodyChunks = (req) => new Promise((resolve, reject) => {
+  console.log('start getBodyChunks')
+  if (req.getBodyChunks) {
+    console.log('has getBodyChunks')
+    return req.getBodyChunks
+  }
   let body = ''
   const chunks = []
   req.on('data', (data) => {
@@ -175,7 +181,9 @@ const getBodyChunks = (req) => new Promise((resolve, reject) => {
     }
   })
   req.on('end', () => {
+    req.getBodyChunks = chunks
     resolve(chunks)
+    console.log('end getBodyChunks')
   })
   setTimeout(resolve, 5000)
 })
