@@ -69,16 +69,9 @@ proxy.on('proxyRes', async (proxyRes, req, res) => {
         const reqBody = req.jsonBody.replace(/,"id":"[^"]*"/, '') // remove id field or caching wont work
         cache?.set(reqBody, resBody)
       }
-      res.writeHead(proxyRes.statusCode, proxyRes.headers)
-      return res.end(resBody)
     }
-    catch (e) {
-      res.writeHead(404)
-      return res.end(e.message)
-    }
+    catch (e) {}
   }
-  res.writeHead(proxyRes.statusCode, proxyRes.headers)
-  proxyRes.pipe(res)
 })
 proxy.on('upgrade', (req, socket, head) => {
   // proxy.ws(req, socket, head)
@@ -160,7 +153,6 @@ const startServer = (port) => {
       buffer: streamify(bodyChunks),
       // the proxy changes the host to localhost without changeOrigin
       changeOrigin: true,
-      selfHandleResponse: true, // needed for caching with on('proxyRes')
     })
   })
   server.on('error', console.error)
