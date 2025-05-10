@@ -28,7 +28,7 @@ if (architecture === 'ia32') {
 } else {
   throw Error(`ipfs doesn't support architecture '${architecture}'`)
 }
-const ipfsClientVersion = '0.32.1'
+const ipfsClientVersion = '0.34.1'
 const ipfsClientLinuxUrl = `https://dist.ipfs.io/kubo/v${ipfsClientVersion}/kubo_v${ipfsClientVersion}_linux-${ipfsClientArchitecture}.tar.gz`
 
 // list of http routers to use
