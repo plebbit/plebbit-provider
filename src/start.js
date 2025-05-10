@@ -1,9 +1,6 @@
 require('dotenv').config()
 const http = require('http')
 const httpProxy = require('http-proxy')
-const Debug = require('debug')
-const debugProxy = require('debug')('plebbit-provider:proxy')
-Debug.enable('plebbit-provider:*')
 
 // cli args
 const shutdownKey = process.argv.includes('--shutdown-key') && process.argv[process.argv.indexOf('--shutdown-key') + 1]
@@ -18,6 +15,11 @@ const {proxyIpfsTracker} = require('./ipfs-tracker')
 const {proxyPlebbitPreviewer} = require('./plebbit-previewer')
 const {proxyPubsubProvider} = require('./pubsub-provider')
 const {proxyCerbot} = require('./certbot')
+
+// logs
+const Debug = require('debug')
+const debugProxy = require('debug')('plebbit-provider:proxy')
+Debug.enable('plebbit-provider:*')
 
 // use basic auth to have access to any ipfs api and /debug/, not just pubsub
 const basicAuthUsername = process.env.BASIC_AUTH_USERNAME

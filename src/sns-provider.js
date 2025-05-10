@@ -71,6 +71,7 @@ proxy.on('proxyRes', async (proxyRes, req, res) => {
     }
     catch (e) {}
   }
+  console.log('cache onProxyRes finished')
 })
 proxy.on('upgrade', (req, socket, head) => {
   // proxy.ws(req, socket, head)
@@ -133,6 +134,7 @@ const startServer = (port) => {
 
     // handle cache
     const cached = cache?.get(jsonBody.replace(/,"id":"[^"]*"/, '')) // remove id field or caching wont work)
+    console.log('cached')
     debug(req.method, req.url, req.headers, body, `cached: ${!!cached}`)
     if (cached) {
       res.setHeader('Content-Type', 'application/json')
@@ -182,6 +184,7 @@ const getBodyChunks = (req) => new Promise((resolve, reject) => {
   })
   req.on('end', () => {
     req.getBodyChunks = chunks
+    console.log(chunks.join(''))
     resolve(chunks)
     console.log('end getBodyChunks')
   })
