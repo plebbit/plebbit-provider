@@ -58,7 +58,7 @@ proxy.on('error', (e, req, res) => {
 })
 proxy.on('proxyRes', async (proxyRes, req, res) => {
   // cache response
-  if (res.statusCode === 200) {
+  if (proxyRes.statusCode === 200) {
     try {
       const chunks = await getBodyChunks(proxyRes)
       const resBody = chunks.join('')
@@ -69,7 +69,10 @@ proxy.on('proxyRes', async (proxyRes, req, res) => {
       res.writeHead(proxyRes.statusCode, proxyRes.headers)
       return res.end(resBody)
     }
-    catch (e) {}
+    catch (e) {
+      res.writeHead(404)
+      return res.end(e.message)
+    }
   }
   res.writeHead(proxyRes.statusCode, proxyRes.headers)
   proxyRes.pipe(res)
@@ -154,7 +157,7 @@ const startServer = (port) => {
       buffer: streamify(bodyChunks),
       // the proxy changes the host to localhost without changeOrigin
       changeOrigin: true,
-      selfHandleResponse: true,
+      selfHandleResponse: true, // needed for caching with on('proxyRes')
     })
   })
   server.on('error', console.error)
