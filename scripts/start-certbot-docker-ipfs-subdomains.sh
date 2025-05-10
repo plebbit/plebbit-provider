@@ -128,6 +128,7 @@ http {
 
             # cache
             # don't cache because can only respect max-age with nginx pro subscription
+            # also doesn't work with ipns if-none-match header
 
             # fix pubsub http2 issue
             proxy_buffering off;
