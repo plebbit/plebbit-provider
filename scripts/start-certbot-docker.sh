@@ -84,9 +84,6 @@ events {
 }
 
 http {
-    # enable caching
-    proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=plebbit-provider-cache:10m max_size=1g inactive=60m use_temp_path=off;
-
     # remove nginx header
     server_tokens off;
     add_header Server "";
@@ -118,12 +115,8 @@ http {
             proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto \$scheme;
 
-            # enable caching
-            proxy_cache plebbit-provider-cache;
-            # make sure subdomain is included in cache keys
-            proxy_cache_key "\$scheme\$host\$request_uri";
-            # only cache if cache-control header is present
-            proxy_cache_bypass \$http_cache_control;
+            # cache
+            # don't cache because can only respect max-age with nginx pro subscription
 
             # fix pubsub http2 issue
             proxy_buffering off;
