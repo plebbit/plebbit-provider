@@ -21,7 +21,7 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --cloudflare-api-token)
-      CLOUDFLARE_API_TOKEN="$3"
+      CLOUDFLARE_API_TOKEN="$2"
       shift 2
       ;;
     *)
@@ -32,7 +32,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # validate args
-if [ -z "$DOMAIN" ] || [ -z "$CERT_EMAIL" || [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+if [ -z "$DOMAIN" ] || [ -z "$CERT_EMAIL" ] || [ -z "$CLOUDFLARE_API_TOKEN" ]; then
   echo "Usage: $0 --domain yourdomain.com --email you@example.com --cloudflare-api-token abc..."
   exit 1
 fi

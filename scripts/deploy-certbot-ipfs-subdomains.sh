@@ -34,7 +34,7 @@ done
 
 SCRIPT="
 cd /home/plebbit-provider
-scripts/start-certbot-docker-ipfs-subdomains.sh --domain $DOMAIN --email $CERT_EMAIL --cloudflare-api-tok $CLOUDFLARE_API_TOKEN
+scripts/start-certbot-docker-ipfs-subdomains.sh --domain $DOMAIN --email $CERT_EMAIL --cloudflare-api-token $CLOUDFLARE_API_TOKEN
 "
 
 echo "$SCRIPT" | sshpass -p "$DEPLOY_PASSWORD" ssh "$DEPLOY_USER"@"$DEPLOY_HOST"
