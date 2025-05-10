@@ -57,20 +57,20 @@ proxy.on('error', (e, req, res) => {
   res.end(`502 Bad Gateway: ${e.message}`)
 })
 proxy.on('proxyRes', async (proxyRes, req, res) => {
-  console.log('proxyRes.statusCode', proxyRes.statusCode)
+  console.log('proxyRes.statusCode', proxyRes.statusCode, 'res.statusCode', res.statusCode)
   // cache response
-  if (proxyRes.statusCode === 200) {
-    try {
-      const chunks = await getBodyChunks(proxyRes)
-      const resBody = chunks.join('')
-      if (!resBody.includes('"error":')) { // shouldn't happen with res.statusCode === 200, but just in case
-        const reqBody = req.jsonBody.replace(/,"id":"[^"]*"/, '') // remove id field or caching wont work
-        JSON.parse(resBody) // validate json just to be sure
-        cache?.set(reqBody, resBody)
-      }
-    }
-    catch (e) {}
-  }
+  // if (proxyRes.statusCode === 200) {
+  //   try {
+  //     const chunks = await getBodyChunks(proxyRes)
+  //     const resBody = chunks.join('')
+  //     if (!resBody.includes('"error":')) { // shouldn't happen with res.statusCode === 200, but just in case
+  //       const reqBody = req.jsonBody.replace(/,"id":"[^"]*"/, '') // remove id field or caching wont work
+  //       JSON.parse(resBody) // validate json just to be sure
+  //       cache?.set(reqBody, resBody)
+  //     }
+  //   }
+  //   catch (e) {}
+  // }
   console.log('cache onProxyRes finished')
 })
 proxy.on('upgrade', (req, socket, head) => {
