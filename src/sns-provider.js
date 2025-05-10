@@ -48,6 +48,9 @@ proxy.on('proxyReq', function(proxyReq, req, res, options) {
 
   // fix bug where path name has extra / added after
   proxyReq.path = chainProvider.pathname + chainProvider.search
+
+  // fix https issue where json gets sent twice
+  proxyReq.setHeader('Connection', 'close')
 })
 proxy.on('error', (e, req, res) => {
   console.error(e)
