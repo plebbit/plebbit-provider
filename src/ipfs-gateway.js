@@ -93,7 +93,7 @@ const proxyIpfsGateway = async (proxy, req, res) => {
   }
 
   if (ipnsName && ipnsCachingAndRevalidatingUntil[ipnsName] && !ipnsInvalid[ipnsName]) {
-    debugGateway(req.method, req.headers.host, req.url, 'cached, skipping validation')
+    debugGateway(req.method, req.headers.host, req.url, 'cached, skipping validation', rewriteHeaders)
     proxy.web(req, res, {
       target: ipfsGatewayUrl, 
       headers: rewriteHeaders, // rewrite host header to match kubo Gateway.PublicGateways config
