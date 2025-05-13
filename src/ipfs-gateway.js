@@ -58,6 +58,7 @@ const proxyIpfsGateway = async (proxy, req, res) => {
 
   // fix error 'has been blocked by CORS policy'
   res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Headers', '*') // if-none-match won't work without it
 
   const subdomains = req.headers.host?.split('.') || []
   // if is subdomain redirect, redirect right away
