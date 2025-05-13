@@ -118,6 +118,12 @@ const startServer = (port) => {
       return sendMetrics(req, res)
     }
 
+    // ipfs gateway endpoints
+    const subdomains = req.headers.host?.split('.') || []
+    if ((req.method === 'GET' || req.method === 'OPTIONS') && (subdomains[1] === 'ipfs' || subdomains[1] === 'ipns' || req.url.startsWith('/ipfs') || req.url.startsWith('/ipns'))) {
+      return proxyIpfsGateway(proxy, req, res)
+    }
+
     // .sol provider
     if (isSnsProvider(req)) {
       return proxySnsProvider(proxy, req, res)
@@ -126,12 +132,6 @@ const startServer = (port) => {
     // .eth provider
     if ((req.method === 'POST' || req.method === 'OPTIONS') && req.url === '/') {
       return proxyEnsProvider(proxy, req, res)
-    }
-
-    // ipfs gateway endpoints
-    const subdomains = req.headers.host?.split('.') || []
-    if ((req.method === 'GET' || req.method === 'OPTIONS') && (subdomains[1] === 'ipfs' || subdomains[1] === 'ipns' || req.url.startsWith('/ipfs') || req.url.startsWith('/ipns'))) {
-      return proxyIpfsGateway(proxy, req, res)
     }
 
     // ipfs tracker endpoints
