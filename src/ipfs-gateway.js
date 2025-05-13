@@ -56,8 +56,8 @@ const proxyIpfsGateway = async (proxy, req, res) => {
   // host must match kubo Gateway.PublicGateways config
   const rewriteHeaders = {
     host: 'localhost',
-    'access-control-allow-origin', '*', // fix error 'has been blocked by CORS policy'
-    'access-control-allow-headers', '*' // if-none-match won't work without it
+    'access-control-allow-origin': '*', // fix error 'has been blocked by CORS policy'
+    'access-control-allow-headers': '*' // if-none-match won't work without it
   }
 
   const subdomains = req.headers.host?.split('.') || []
