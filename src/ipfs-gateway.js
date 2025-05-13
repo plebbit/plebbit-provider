@@ -24,6 +24,7 @@ const rewriteIpfsGatewaySubdomainsHost = (proxy) => {
   proxy.on('proxyRes', (proxyRes, req, res) => {
     // request is not a subdomain redirect, ignore it
     if (req.method !== 'GET' || !proxyRes.headers.location || (!req.url.startsWith('/ipfs') && !req.url.startsWith('/ipns'))) {
+      console.log('proxyRes', proxyRes.headers)
       res.writeHead(proxyRes.statusCode, proxyRes.headers)
       proxyRes.pipe(res)
       return
