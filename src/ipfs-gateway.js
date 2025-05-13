@@ -24,8 +24,11 @@ const rewriteIpfsGatewaySubdomainsHost = (proxy) => {
   proxy.on('proxyRes', (proxyRes, req, res) => {
     // request is not a subdomain redirect, ignore it
     if (req.method !== 'GET' || !proxyRes.headers.location || (!req.url.startsWith('/ipfs') && !req.url.startsWith('/ipns'))) {
-      console.log('proxyRes', proxyRes.headers)
-      res.writeHead(proxyRes.statusCode, proxyRes.headers)
+      res.writeHead(proxyRes.statusCode, {
+        ...proxyRes.headers,
+        'access-control-allow-origin': '*', // fix error 'has been blocked by CORS policy'
+        'access-control-allow-headers': '*' // if-none-match won't work without it
+      })
       proxyRes.pipe(res)
       return
     }
@@ -94,7 +97,7 @@ const proxyIpfsGateway = async (proxy, req, res) => {
   }
 
   if (ipnsName && ipnsCachingAndRevalidatingUntil[ipnsName] && !ipnsInvalid[ipnsName]) {
-    debugGateway(req.method, req.headers.host, req.url, 'cached, skipping validation', rewriteHeaders)
+    debugGateway(req.method, req.headers.host, req.url, 'cached, skipping validation')
     proxy.web(req, res, {
       target: ipfsGatewayUrl, 
       headers: rewriteHeaders, // rewrite host header to match kubo Gateway.PublicGateways config
