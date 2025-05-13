@@ -130,7 +130,7 @@ const startServer = (port) => {
 
     // ipfs gateway endpoints
     const subdomains = req.headers.host?.split('.') || []
-    if (req.method === 'GET' && (subdomains[1] === 'ipfs' || subdomains[1] === 'ipns' || req.url.startsWith('/ipfs') || req.url.startsWith('/ipns'))) {
+    if ((req.method === 'GET' || req.method === 'OPTIONS') && (subdomains[1] === 'ipfs' || subdomains[1] === 'ipns' || req.url.startsWith('/ipfs') || req.url.startsWith('/ipns'))) {
       return proxyIpfsGateway(proxy, req, res)
     }
 
