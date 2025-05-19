@@ -29,8 +29,11 @@ const rewriteIpfsGatewaySubdomainsHost = (proxy) => {
         'access-control-allow-origin': '*', // fix error 'has been blocked by CORS policy'
         'access-control-allow-headers': '*' // if-none-match won't work without it
       })
-      proxyRes.pipe(res)
-      return
+      // OPTIONS never has body so no need to pipe, piping might not add access-control headers
+      if (req.method === 'OPTIONS') {
+        return res.end()
+      }
+      return proxyRes.pipe(res)
     }
 
     // wait for body
@@ -63,6 +66,12 @@ const proxyIpfsGateway = async (proxy, req, res) => {
     'access-control-allow-origin': '*', // fix error 'has been blocked by CORS policy'
     'access-control-allow-headers': '*' // if-none-match won't work without it
   }
+
+  proxy.web(req, res, {
+    target: ipfsGatewayUrl, 
+    headers: rewriteHeaders, // rewrite host header to match kubo Gateway.PublicGateways config
+    selfHandleResponse: ipfsGatewayUseSubdomains // content-type error without selfHandleResponse: true with ipfsGatewayUseSubdomains, not sure why, curl says "* Excess found in a read: excess"
+  })
 
   const subdomains = req.headers.host?.split('.') || []
   // if is subdomain redirect, redirect right away
