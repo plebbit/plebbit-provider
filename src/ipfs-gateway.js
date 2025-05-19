@@ -66,7 +66,7 @@ const proxyIpfsGateway = async (proxy, req, res) => {
 
   const subdomains = req.headers.host?.split('.') || []
   // if is subdomain redirect, redirect right away
-  if (ipfsGatewayUseSubdomains && (subdomains[1] !== 'ipfs' && subdomains[1] !== 'ipns' && req.method === 'GET')) {
+  if (ipfsGatewayUseSubdomains && (subdomains[1] !== 'ipfs' && subdomains[1] !== 'ipns')) {
     proxy.web(req, res, {
       target: ipfsGatewayUrl, 
       headers: rewriteHeaders, // rewrite host header to match kubo Gateway.PublicGateways config
