@@ -48,6 +48,11 @@ const rewriteIpfsGatewaySubdomainsHost = (proxy) => {
       res.setHeader('location', rewrittenLocation)
       res.setHeader('content-length', Buffer.byteLength(rewrittenBody))
       res.statusCode = 301
+
+      if (req.method === 'OPTIONS') {
+        res.statusCode = 204
+      }
+
       // proxy body
       res.end(rewrittenBody)
     })
