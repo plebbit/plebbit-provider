@@ -25,14 +25,6 @@ const rewriteIpfsGatewaySubdomainsHost = (proxy) => {
     proxyRes.headers['access-control-allow-origin'] = '*' // fix error 'has been blocked by CORS policy'
     proxyRes.headers['access-control-allow-headers'] = '*' // if-none-match won't work without it
 
-    // request is OPTIONS for if-none-match
-    if (req.method === 'OPTIONS') {
-      console.log('writing options')
-      res.writeHead(proxyRes.statusCode, proxyRes.headers)
-      return res.end()
-    }
-    console.log('after writing options')
-
     // request is not a subdomain redirect, ignore it
     if (req.method !== 'GET' || !proxyRes.headers.location || (!req.url.startsWith('/ipfs') && !req.url.startsWith('/ipns'))) {
       res.writeHead(proxyRes.statusCode, proxyRes.headers)
