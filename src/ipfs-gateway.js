@@ -22,19 +22,20 @@ const rewriteIpfsGatewaySubdomainsHost = (proxy) => {
     return
   }
   proxy.on('proxyRes', (proxyRes, req, res) => {
+    proxyRes.headers['access-control-allow-origin'] = '*' // fix error 'has been blocked by CORS policy'
+    proxyRes.headers['access-control-allow-headers'] = '*' // if-none-match won't work without it
+
+    // request is OPTIONS for if-none-match
+    if (req.method === 'OPTIONS') {
+      res.writeHead(proxyRes.statusCode, proxyRes.headers)
+      return res.end()
+    }
+
     // request is not a subdomain redirect, ignore it
     if (req.method !== 'GET' || !proxyRes.headers.location || (!req.url.startsWith('/ipfs') && !req.url.startsWith('/ipns'))) {
-      res.writeHead(proxyRes.statusCode, {
-        ...proxyRes.headers,
-        'access-control-allow-origin': '*', // fix error 'has been blocked by CORS policy'
-        'access-control-allow-headers': '*' // if-none-match won't work without it
-      })
-      // OPTIONS never has body so no need to pipe, piping might not add access-control headers
-      console.log(req, proxyRes.headers)
-      if (req.method === 'OPTIONS') {
-        return res.end()
-      }
-      return proxyRes.pipe(res)
+      res.writeHead(proxyRes.statusCode, proxyRes.headers)
+      proxyRes.pipe(res)
+      return
     }
 
     // wait for body
@@ -68,15 +69,9 @@ const proxyIpfsGateway = async (proxy, req, res) => {
     'access-control-allow-headers': '*' // if-none-match won't work without it
   }
 
-  proxy.web(req, res, {
-    target: ipfsGatewayUrl, 
-    headers: rewriteHeaders, // rewrite host header to match kubo Gateway.PublicGateways config
-    selfHandleResponse: ipfsGatewayUseSubdomains // content-type error without selfHandleResponse: true with ipfsGatewayUseSubdomains, not sure why, curl says "* Excess found in a read: excess"
-  })
-
   const subdomains = req.headers.host?.split('.') || []
   // if is subdomain redirect, redirect right away
-  if (ipfsGatewayUseSubdomains && (subdomains[1] !== 'ipfs' && subdomains[1] !== 'ipns')) {
+  if (ipfsGatewayUseSubdomains && (subdomains[1] !== 'ipfs' && subdomains[1] !== 'ipns' && req.method === 'GET')) {
     proxy.web(req, res, {
       target: ipfsGatewayUrl, 
       headers: rewriteHeaders, // rewrite host header to match kubo Gateway.PublicGateways config
