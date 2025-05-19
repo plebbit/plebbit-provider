@@ -26,7 +26,8 @@ const rewriteIpfsGatewaySubdomainsHost = (proxy) => {
     proxyRes.headers['access-control-allow-headers'] = '*' // if-none-match won't work without it
 
     // request is not a subdomain redirect, ignore it
-    if (req.method !== 'GET' || !proxyRes.headers.location || (!req.url.startsWith('/ipfs') && !req.url.startsWith('/ipns'))) {
+    // NOTE: method GET and OPTIONS both need to redirect
+    if (!proxyRes.headers.location || (!req.url.startsWith('/ipfs') && !req.url.startsWith('/ipns'))) {
       res.writeHead(proxyRes.statusCode, proxyRes.headers)
       proxyRes.pipe(res)
       return
