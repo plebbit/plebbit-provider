@@ -30,6 +30,7 @@ const rewriteIpfsGatewaySubdomainsHost = (proxy) => {
         'access-control-allow-headers': '*' // if-none-match won't work without it
       })
       // OPTIONS never has body so no need to pipe, piping might not add access-control headers
+      console.log(req, proxyRes.headers)
       if (req.method === 'OPTIONS') {
         return res.end()
       }
