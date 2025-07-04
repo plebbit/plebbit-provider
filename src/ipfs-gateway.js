@@ -155,6 +155,20 @@ const proxyIpfsGateway = async (proxy, req, res) => {
     startCachingAndRevalidatingIpns(ipnsName)
   }
 
+  // rewriteHeaders won't overwrite kubo's already existing headers unless selfHandleResponse
+  // and access-control-allow-headers: * is needed for if-none-match
+  // a temporary quick fix is to send options response ourselves
+  if (!ipfsGatewayUseSubdomains && req.method === 'OPTIONS') {
+    res.writeHead(204, {
+      'access-control-allow-origin': '*',
+      'access-control-allow-headers': '*',
+      'access-control-allow-methods': 'GET, HEAD, OPTIONS',
+      'content-length': '0',
+    })
+    res.end()
+    return
+  }
+
   proxy.web(req, res, {
     target: ipfsGatewayUrl, 
     headers: rewriteHeaders, // rewrite host header to match kubo Gateway.PublicGateways config

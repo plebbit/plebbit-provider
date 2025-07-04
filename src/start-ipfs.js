@@ -95,34 +95,6 @@ async function initIpfs() {
   try {
     // turn off local discovery because sometimes causes hosting provider to terminate service
     execSync(`${ipfsBinaryPath} config profile apply server`, {env, stdio: 'inherit'})
-    // execSync(`${ipfsBinaryPath} config --json Discovery.MDNS.Enabled false`, {env, stdio: 'inherit'})
-    // execSync(`${ipfsBinaryPath} config --json Swarm.DisableNatPortMap true`, {env, stdio: 'inherit'})
-    // execSync(`${ipfsBinaryPath} config --json Swarm.EnableHolePunching false`, {env, stdio: 'inherit'})
-    // execSync(`${ipfsBinaryPath} config --json Swarm.RelayClient.Enabled false`, {env, stdio: 'inherit'})
-
-    // disable helping network with autonat and relay service to save resources
-    // execSync(`${ipfsBinaryPath} config AutoNAT.ServiceMode disabled`, {env, stdio: 'inherit'})
-    // execSync(`${ipfsBinaryPath} config --json Swarm.RelayService.Enabled false`, {env, stdio: 'inherit'})
-    // execSync(`${ipfsBinaryPath} config --json Swarm.Transports.Network.Relay false`, {env, stdio: 'inherit'})
-
-    // disable metrics to save resources
-    // execSync(`${ipfsBinaryPath} config --json Swarm.DisableBandwidthMetrics true`, {env, stdio: 'inherit'})
-
-    // enable disable metrics to debug
-    // execSync(`${ipfsBinaryPath} config --json Swarm.ResourceMgr.Enabled true`, {env, stdio: 'inherit'})
-    // execSync(`${ipfsBinaryPath} config --json Swarm.DisableBandwidthMetrics false`, {env, stdio: 'inherit'})
-
-    // enable delegated routing as part of plebbit provider
-    // not needed because the reverse proxy can expose it
-    // execSync(`${ipfsBinaryPath} config --json Gateway.ExposeRoutingAPI true`, {env, stdio: 'inherit'})
-
-    // enable webrtc-direct to test it
-    // execSync(`${ipfsBinaryPath} config --json Swarm.Transports.Network.WebRTCDirect true`, {env, stdio: 'inherit'})
-
-    // disable TCP to test if it helps stability
-    // execSync(`${ipfsBinaryPath} config --json Swarm.Transports.Network.TCP false`, {env, stdio: 'inherit'})
-    // execSync(`${ipfsBinaryPath} config --json Swarm.Transports.Network.Websocket false`, {env, stdio: 'inherit'})
-    // execSync(`${ipfsBinaryPath} config --json Swarm.Transports.Network.WebRTCDirect false`, {env, stdio: 'inherit'})
 
     // config gateway
     let PublicGateways = {
