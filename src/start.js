@@ -100,6 +100,12 @@ const startServer = (port) => {
       return
     }
 
+    // commit hash
+    if (req.url === '/commit-hash') {
+      res.end(require('./commit-hash'))
+      return
+    }
+
     // certbot nginx proxy
     if (req.url.startsWith('/.well-known/acme-challenge')) {
       console.log(req.method, req.url, req.rawHeaders)
