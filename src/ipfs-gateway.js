@@ -63,6 +63,20 @@ const rewriteIpfsGatewaySubdomainsHost = (proxy) => {
 const proxyIpfsGateway = async (proxy, req, res) => {
   debugGateway(req.method, req.headers.host, req.url, req.rawHeaders)
 
+  // kubo doesn't handle OPTIONS optimally at the moment
+  // until fixed, send response ourselves
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204, {
+      'access-control-allow-origin': '*',
+      'access-control-allow-headers': '*',
+      'access-control-allow-methods': 'GET, HEAD, OPTIONS',
+      'access-control-max-age': '86400', // cache for 24h, browsers don't allow large values
+      'content-length': '0',
+    })
+    res.end()
+    return
+  }
+
   // host must match kubo Gateway.PublicGateways config
   const rewriteHeaders = {
     host: 'localhost',
