@@ -102,6 +102,9 @@ async function initIpfs() {
     }
     execSync(`${ipfsBinaryPath} config  --json Gateway.PublicGateways '${JSON.stringify(PublicGateways)}'`, {env, stdio: 'inherit'})
 
+    // needed for ipns if-none-match
+    execSync(`${ipfsBinaryPath} config  --json Gateway.HTTPHeaders.Access-Control-Allow-Headers '["If-None-Match"]'`, {env, stdio: 'inherit'})
+
     // create http routers config
     const httpRoutersConfig = {
       HttpRoutersParallel: {Type: 'parallel', Parameters: {Routers: []}},
