@@ -169,6 +169,8 @@ const proxyIpfsGateway = async (proxy, req, res) => {
     startCachingAndRevalidatingIpns(ipnsName)
   }
 
+  // NOTE: rewriteHeaders won't overwrite already existing headers like access-control-allow-headers
+  // must be added to kubo config or use selfHandleResponse: true
   proxy.web(req, res, {
     target: ipfsGatewayUrl, 
     headers: rewriteHeaders, // rewrite host header to match kubo Gateway.PublicGateways config
