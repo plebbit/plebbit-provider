@@ -19,8 +19,15 @@ if [ -z "${DEPLOY_PASSWORD+xxx}" ]; then echo "DEPLOY_PASSWORD not set" && exit;
 SCRIPT="
 docker ps
 docker logs --follow -n 1000 plebbit-provider
-date
 "
+
+# run garbage collector
+# SCRIPT="
+# docker ps
+# df -h
+# docker exec plebbit-provider /bin/sh -c \"IPFS_PATH=.ipfs bin/ipfs repo gc\"
+# df -h
+# "
 
 # logs with timestamp example
 # SCRIPT="
