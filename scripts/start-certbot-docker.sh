@@ -65,7 +65,7 @@ docker run \
   certbot/certbot sh -c '
     while :; do
       echo "checking for certificate renewal..."
-      certbot renew --webroot --webroot-path /var/www/certbot --quiet
+      certbot renew --webroot --webroot-path /var/www/certbot
       echo "renewal check completed on $(date), sleeping for 1 day..."
       sleep 86400
     done'
