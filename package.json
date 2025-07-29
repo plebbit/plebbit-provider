@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@plebbit/ipfs-tracker": "https://github.com/plebbit/ipfs-tracker.git#6b8c1d96e0999d2da05a2e0cbcf79caa0227762c",
+    "dotenv": "16.0.1",
     "cborg": "2.0.3",
     "debug": "4.3.4",
     "decompress": "4.2.1",
@@ -37,7 +38,6 @@
   "devDependencies": {
     "buffer": "6.0.3",
     "chai": "4.3.6",
-    "dotenv": "16.0.1",
     "karma": "6.3.20",
     "karma-chai": "0.1.0",
     "karma-chrome-launcher": "3.1.1",
