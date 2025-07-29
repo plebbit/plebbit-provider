@@ -12,7 +12,6 @@
   "license": "ISC",
   "dependencies": {
     "@plebbit/ipfs-tracker": "https://github.com/plebbit/ipfs-tracker.git#6b8c1d96e0999d2da05a2e0cbcf79caa0227762c",
-    "@plebbit/plebbit-previewer": "https://github.com/plebbit/plebbit-previewer.git#8f6eb6548ede0066fc3122f0744e03cb6cb3f959",
     "cborg": "2.0.3",
     "debug": "4.3.4",
     "decompress": "4.2.1",

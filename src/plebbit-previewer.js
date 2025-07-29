@@ -9,7 +9,12 @@ const startPlebbitPreviewer = async () => {
   require('@plebbit/plebbit-previewer/start.js')
   console.log(`plebbit previewer listening on port ${port}`)
 }
-startPlebbitPreviewer()
+try {
+  startPlebbitPreviewer()
+}
+catch (e) {
+  console.log('failed starting plebbit previewer', e.message)
+}
 
 const proxyPlebbitPreviewer = async (proxy, req, res) => {
   debug(req.method, req.url, req.rawHeaders)
