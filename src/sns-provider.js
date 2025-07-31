@@ -149,7 +149,7 @@ const startServer = (port) => {
     try {
       await rateLimiter.consume(req.headers['x-forwarded-for'])
     } catch (e) {
-      debug(req.method, req.url, req.headers, 'rate limited')
+      // debug(req.method, req.url, req.headers, 'rate limited')
       res.end()
       return
     }
