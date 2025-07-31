@@ -150,6 +150,7 @@ const startServer = (port) => {
         }
       } catch (e) {
         // debug(req.method, req.url, req.headers, 'rate limited')
+        debug('rate limited', req.headers['x-forwarded-for'])
         res.end()
         return
       }
