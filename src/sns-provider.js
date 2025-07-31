@@ -7,6 +7,11 @@ const streamify = require('stream-array')
 const {RateLimiterMemory} = require('rate-limiter-flexible')
 const rateLimiter = new RateLimiterMemory({points: 10, duration: 30 * 60})
 
+const badIps = new Set([
+  '194.11.226.35',
+  '91.99.67.170'
+])
+
 const cacheMaxAge = 1000 * 60 * 5
 
 const chainProviderUrl = process.env.SOL_PROVIDER_URL
@@ -148,6 +153,9 @@ const startServer = (port) => {
     // rate limit after cache to save rpc credits
     try {
       await rateLimiter.consume(req.headers['x-forwarded-for'])
+      if (badIps.has(req.headers['x-forwarded-for'])) {
+        throw Error('bad ip')
+      }
     } catch (e) {
       // debug(req.method, req.url, req.headers, 'rate limited')
       res.end()
