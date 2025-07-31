@@ -151,6 +151,7 @@ const startServer = (port) => {
     } catch (e) {
       debug(req.method, req.url, req.headers, 'rate limited')
       res.end()
+      return
     }
 
     // expires after 5 minutes (300 seconds), must revalidate if expired
