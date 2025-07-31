@@ -4,12 +4,8 @@ require('dotenv').config()
 const Debug = require('debug')
 const debug = Debug('plebbit-provider:sns-provider')
 const streamify = require('stream-array')
-
-const counts = {}
-const count = (ip) => {
-  if (!counts[ip]) counts[ip] = 0
-  return counts[ip]++
-}
+const {RateLimiterMemory} = require('rate-limiter-flexible')
+const rateLimiter = new RateLimiterMemory({points: 100, duration: 15 * 60})
 
 const cacheMaxAge = 1000 * 60 * 5
 
@@ -140,7 +136,7 @@ const startServer = (port) => {
 
     // handle cache
     const cached = cache?.get(jsonBody.replace(/,"id":"[^"]*"/, '')) // remove id field or caching wont work)
-    debug(req.method, req.url, req.headers, body, `cached: ${!!cached}`, req.headers['x-forwarded-for'], count(req.headers['x-forwarded-for']))
+    debug(req.method, req.url, req.headers, body, `cached: ${!!cached}`)
     if (cached) {
       res.setHeader('Content-Type', 'application/json')
       res.statusCode = 200
@@ -148,6 +144,14 @@ const startServer = (port) => {
       return
     }
     req.jsonBody = jsonBody
+
+    // rate limit after cache to save rpc credits
+    try {
+      await rateLimiter.consume(req.headers['x-forwarded-for'])
+    } catch (e) {
+      debug(req.method, req.url, req.headers, 'rate limited')
+      res.end()
+    }
 
     // expires after 5 minutes (300 seconds), must revalidate if expired
     // SNS must not be cached for too long otherwise user can't see his changes reflected
