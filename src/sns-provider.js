@@ -134,7 +134,7 @@ const startServer = (port) => {
 
     // handle cache
     const cached = cache?.get(jsonBody.replace(/,"id":"[^"]*"/, '')) // remove id field or caching wont work)
-    debug(req.method, req.url, req.headers, body, `cached: ${!!cached}`)
+    debug(req.method, req.url, req.headers, body, `cached: ${!!cached}`, req.headers['x-forwarded-for'] || req.socket.remoteAddress)
     if (cached) {
       res.setHeader('Content-Type', 'application/json')
       res.statusCode = 200
