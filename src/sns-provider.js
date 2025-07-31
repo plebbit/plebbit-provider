@@ -11,6 +11,16 @@ const rateLimited = new Set([
   '91.99.67.170'
 ])
 
+const allowedMethods = new Set([
+  // sns
+  'getAccountInfo'
+])
+
+const allowedAddresses = new Set([
+  // sns
+  '2C7gZo2mFQ7GLsDdZcH6KRhdPZU36MmeUdpQsvwih19F'
+])
+
 const cacheMaxAge = 1000 * 60 * 5
 
 const chainProviderUrl = process.env.SOL_PROVIDER_URL
@@ -92,6 +102,9 @@ const startServer = (port) => {
   server.keepAliveTimeout = 0
 
   server.on('request', async (req, res) => {
+    res.statusCode = 404
+    res.end()
+
     // unrelated endpoints
     if (req.url === '/service-worker.js' || req.url === '/manifest.json' || req.url === '/favicon.ico') {
       res.end()
