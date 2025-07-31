@@ -5,7 +5,7 @@ const Debug = require('debug')
 const debug = Debug('plebbit-provider:sns-provider')
 const streamify = require('stream-array')
 const {RateLimiterMemory} = require('rate-limiter-flexible')
-const rateLimiter = new RateLimiterMemory({points: 100, duration: 15 * 60})
+const rateLimiter = new RateLimiterMemory({points: 10, duration: 30 * 60})
 
 const cacheMaxAge = 1000 * 60 * 5
 
