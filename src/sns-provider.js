@@ -184,6 +184,7 @@ const getBodyChunks = (req) => new Promise((resolve, reject) => {
 
 // use this function in the proxy script
 const proxySnsProvider = (proxy, req, res) => {
+  req.headers['x-forwarded-for'] = req.headers['x-forwarded-for'] || req.socket.remoteAddress
   proxy.web(req, res, {target: `http://127.0.0.1:${port}`})
 }
 
