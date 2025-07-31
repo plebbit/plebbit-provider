@@ -104,6 +104,7 @@ const startServer = (port) => {
   server.on('request', async (req, res) => {
     res.statusCode = 404
     res.end()
+    return
 
     // unrelated endpoints
     if (req.url === '/service-worker.js' || req.url === '/manifest.json' || req.url === '/favicon.ico') {
