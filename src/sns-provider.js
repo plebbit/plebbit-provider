@@ -5,6 +5,12 @@ const Debug = require('debug')
 const debug = Debug('plebbit-provider:sns-provider')
 const streamify = require('stream-array')
 
+const counts = {}
+const count = (ip) => {
+  if (!counts[ip]) counts[ip] = 0
+  counts[ip]++
+}
+
 const cacheMaxAge = 1000 * 60 * 5
 
 const chainProviderUrl = process.env.SOL_PROVIDER_URL
@@ -134,7 +140,7 @@ const startServer = (port) => {
 
     // handle cache
     const cached = cache?.get(jsonBody.replace(/,"id":"[^"]*"/, '')) // remove id field or caching wont work)
-    debug(req.method, req.url, req.headers, body, `cached: ${!!cached}`, req.headers['x-forwarded-for'] || req.socket.remoteAddress)
+    debug(req.method, req.url, req.headers, body, `cached: ${!!cached}`, req.headers['x-forwarded-for'], count(req.headers['x-forwarded-for']))
     if (cached) {
       res.setHeader('Content-Type', 'application/json')
       res.statusCode = 200
