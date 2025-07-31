@@ -8,7 +8,7 @@ const streamify = require('stream-array')
 const counts = {}
 const count = (ip) => {
   if (!counts[ip]) counts[ip] = 0
-  counts[ip]++
+  return counts[ip]++
 }
 
 const cacheMaxAge = 1000 * 60 * 5
