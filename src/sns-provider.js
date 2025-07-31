@@ -6,8 +6,7 @@ const debug = Debug('plebbit-provider:sns-provider')
 const streamify = require('stream-array')
 const {RateLimiterMemory} = require('rate-limiter-flexible')
 const rateLimiter = new RateLimiterMemory({points: 10, duration: 30 * 60})
-
-const badIps = new Set([
+const rateLimited = new Set([
   '194.11.226.35',
   '91.99.67.170'
 ])
@@ -141,6 +140,21 @@ const startServer = (port) => {
 
     // handle cache
     const cached = cache?.get(jsonBody.replace(/,"id":"[^"]*"/, '')) // remove id field or caching wont work)
+
+    // rate limit after cache to save rpc credits
+    if (!cached) {
+      try {
+        await rateLimiter.consume(req.headers['x-forwarded-for'])
+        if (rateLimited.has(req.headers['x-forwarded-for'])) {
+          throw Error('rate limited')
+        }
+      } catch (e) {
+        // debug(req.method, req.url, req.headers, 'rate limited')
+        res.end()
+        return
+      }
+    }
+
     debug(req.method, req.url, req.headers, body, `cached: ${!!cached}`)
     if (cached) {
       res.setHeader('Content-Type', 'application/json')
@@ -149,18 +163,6 @@ const startServer = (port) => {
       return
     }
     req.jsonBody = jsonBody
-
-    // rate limit after cache to save rpc credits
-    try {
-      await rateLimiter.consume(req.headers['x-forwarded-for'])
-      if (badIps.has(req.headers['x-forwarded-for'])) {
-        throw Error('bad ip')
-      }
-    } catch (e) {
-      // debug(req.method, req.url, req.headers, 'rate limited')
-      res.end()
-      return
-    }
 
     // expires after 5 minutes (300 seconds), must revalidate if expired
     // SNS must not be cached for too long otherwise user can't see his changes reflected
