@@ -70,9 +70,10 @@ proxy.on('error', (e, req, res) => {
 proxy.on('proxyRes', async (proxyRes, req, res) => {
   // cache response
   if (proxyRes.statusCode === 200) {
+    let resBody = ''
     try {
       const chunks = await getBodyChunks(proxyRes)
-      const resBody = chunks.join('')
+      resBody = chunks.join('')
 
       // rate limit and dont cache non-sns requests
       if (!resBody.includes(`"owner":"names`)) {
@@ -89,10 +90,13 @@ proxy.on('proxyRes', async (proxyRes, req, res) => {
       }
     }
     catch (e) {}
+    res.writeHead(proxyRes.statusCode, proxyRes.headers)
+    res.end(resBody)
+    return
   }
 
   res.writeHead(proxyRes.statusCode, proxyRes.headers)
-  res.end(resBody)
+  proxyRes.pipe(res)
 })
 proxy.on('upgrade', (req, socket, head) => {
   // proxy.ws(req, socket, head)
