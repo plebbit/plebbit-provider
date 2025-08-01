@@ -4,6 +4,14 @@ require('dotenv').config()
 const Debug = require('debug')
 const debug = Debug('plebbit-provider:sns-provider')
 const streamify = require('stream-array')
+const {RateLimiterMemory} = require('rate-limiter-flexible')
+const rateLimiter = new RateLimiterMemory({points: 10, duration: 60 * 60, blockDuration: 60 * 60})
+const isRateLimited = async (ip) => ((await rateLimiter.get(ip))?.remainingPoints ?? 1) <= 0
+
+const allowedMethods = new Set([
+  // sns
+  'getAccountInfo',
+])
 
 const cacheMaxAge = 1000 * 60 * 5
 
@@ -65,6 +73,14 @@ proxy.on('proxyRes', async (proxyRes, req, res) => {
     try {
       const chunks = await getBodyChunks(proxyRes)
       const resBody = chunks.join('')
+
+      // rate limit and dont cache non-sns requests
+      if (!resBody.includes(`"owner":"names`)) {
+        debug('rate limited', req.headers['x-forwarded-for'], req.jsonBody, resBody)
+        await rateLimiter.tryConsume(req.headers['x-forwarded-for'])
+        return
+      }
+
       if (!resBody.includes('"error":')) { // shouldn't happen with res.statusCode === 200, but just in case
         const reqBody = req.jsonBody.replace(/,"id":"[^"]*"/, '') // remove id field or caching wont work
         cache?.set(reqBody, resBody)
@@ -125,15 +141,32 @@ const startServer = (port) => {
       return
     }
 
-    // if (!allowedMethods.has(body.method) || !allowedAddresses.has(body.params[0]?.to?.toLowerCase?.())) {
-    //   debug(req.method, req.url, req.headers, body, 'forbidden')
-    //   res.statusCode = 403
-    //   res.end(plebbitErrorMessage)
-    //   return
-    // }
+    // handle getTokenLargestAccounts always the same
+    if (body.method === 'getTokenLargestAccounts') {
+      res.setHeader('Content-Type', 'application/json')
+      res.statusCode = 200
+      res.end(`{"jsonrpc":"2.0","error":{"code":-32602,"message":"Invalid param: could not find mint"},"id":"${body.id}"}`)
+      return
+    }
+
+    if (!allowedMethods.has(body.method)) {
+      debug(req.method, req.url, req.headers, body, 'forbidden')
+      res.statusCode = 404
+      res.end()
+      return
+    }
 
     // handle cache
     const cached = cache?.get(jsonBody.replace(/,"id":"[^"]*"/, '')) // remove id field or caching wont work)
+
+    // rate limit non-cached non-sns requests
+    if (!cached && await isRateLimited(req.headers['x-forwarded-for'])) {
+      debug('rate limited', req.headers['x-forwarded-for'], body)
+      res.statusCode = 404
+      res.end()
+      return
+    }
+
     debug(req.method, req.url, req.headers, body, `cached: ${!!cached}`)
     if (cached) {
       res.setHeader('Content-Type', 'application/json')
