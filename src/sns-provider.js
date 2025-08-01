@@ -70,7 +70,7 @@ proxy.on('error', (e, req, res) => {
 proxy.on('proxyRes', async (proxyRes, req, res) => {
   // cache response
   if (proxyRes.statusCode === 200) {
-    let resBody = ''
+    let resBody
     try {
       const chunks = await getBodyChunks(proxyRes)
       resBody = chunks.join('')
@@ -91,7 +91,7 @@ proxy.on('proxyRes', async (proxyRes, req, res) => {
     }
     catch (e) {}
     res.writeHead(proxyRes.statusCode, proxyRes.headers)
-    res.end(resBody)
+    res.end(resBody || 'on proxyRes error')
     return
   }
 
