@@ -75,7 +75,7 @@ docker run \
   certbot/dns-cloudflare sh -c '
     while :; do
       echo "checking for certificate renewal..."
-      certbot renew
+      certbot renew --quiet
       echo "renewal check completed on $(date), sleeping for 1 day..."
       sleep 86400
     done'
