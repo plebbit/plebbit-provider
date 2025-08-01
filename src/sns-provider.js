@@ -29,6 +29,16 @@ import('quick-lru').then(QuickLRU => {
   cache = new QuickLRU.default({maxSize: 10000, maxAge: cacheMaxAge})
 })
 
+const replaceId = (jsonStr, id) => {
+  try {
+    const parsed = JSON.parse(jsonStr)
+    parsed.id = id
+    return JSON.stringify(parsed)
+  } catch (e) {
+    return jsonStr
+  }
+}
+
 // start proxy
 const proxy = httpProxy.createProxyServer({selfHandleResponse: true})
 
@@ -85,7 +95,7 @@ proxy.on('proxyRes', async (proxyRes, req, res) => {
       }
 
       if (!resBody.includes('"error":')) { // shouldn't happen with res.statusCode === 200, but just in case
-        const reqBody = req.jsonBody.replace(/,"id":"[^"]*"/, '') // remove id field or caching wont work
+        const reqBody = replaceId(req.jsonBody, '') // remove id field or caching wont work
         cache?.set(reqBody, resBody)
       }
     }
@@ -166,7 +176,7 @@ const startServer = (port) => {
     }
 
     // handle cache
-    const cached = cache?.get(jsonBody.replace(/,"id":"[^"]*"/, '')) // remove id field or caching wont work)
+    const cached = cache?.get(replaceId(jsonBody, '')) // remove id field or caching wont work)
 
     // rate limit non-cached non-sns requests
     if (!cached && await isRateLimited(req.headers['x-forwarded-for'])) {
@@ -180,7 +190,7 @@ const startServer = (port) => {
     if (cached) {
       res.setHeader('Content-Type', 'application/json')
       res.statusCode = 200
-      res.end(cached.replace(/,"id":"[^"]*"/, `,"id":"${body.id}"`)) // add back original id field
+      res.end(replaceId(cached, body.id)) // add back original id field
       return
     }
     req.jsonBody = jsonBody
