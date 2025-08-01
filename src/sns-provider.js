@@ -140,9 +140,14 @@ const startServer = (port) => {
     // fix preflight cors
     if (req.method === 'OPTIONS') {
       debug(req.method, req.url, req.headers)
-      res.setHeader('Access-Control-Allow-Methods', 'POST')
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
-      proxy.web(req, res, {target: chainProviderUrl, changeOrigin: true})
+      res.writeHead(204, {
+        'access-control-allow-origin': '*',
+        'access-control-allow-headers': '*',
+        'access-control-allow-methods': 'GET, POST, HEAD, OPTIONS',
+        'access-control-max-age': '86400', // cache for 24h, browsers don't allow large values
+        'content-length': '0',
+      })
+      res.end()
       return
     }
 
