@@ -76,7 +76,7 @@ proxy.on('proxyRes', async (proxyRes, req, res) => {
 
       // rate limit and dont cache non-sns requests
       if (!resBody.includes(`"owner":"names`)) {
-        debug('rate limited', req.headers['x-forwarded-for'], req.jsonBody, resBody)
+        debug('will rate limit', req.headers['x-forwarded-for'], req.jsonBody, resBody)
         await rateLimiter.tryConsume(req.headers['x-forwarded-for'])
         return
       }
@@ -161,7 +161,7 @@ const startServer = (port) => {
 
     // rate limit non-cached non-sns requests
     if (!cached && await isRateLimited(req.headers['x-forwarded-for'])) {
-      debug('rate limited', req.headers['x-forwarded-for'], body)
+      debug('rate limited', req.headers, body)
       res.statusCode = 404
       res.end()
       return
