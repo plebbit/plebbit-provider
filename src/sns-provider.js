@@ -76,8 +76,10 @@ proxy.on('proxyRes', async (proxyRes, req, res) => {
 
       // rate limit and dont cache non-sns requests
       if (!resBody.includes(`"owner":"names`)) {
-        debug('will rate limit', req.headers['x-forwarded-for'], req.jsonBody, resBody)
+        debug(req.method, req.url, req.headers, req.jsonBody, resBody, 'will rate limit')
         await rateLimiter.tryConsume(req.headers['x-forwarded-for'])
+        res.statusCode = 404
+        res.end()
         return
       }
 
@@ -88,6 +90,9 @@ proxy.on('proxyRes', async (proxyRes, req, res) => {
     }
     catch (e) {}
   }
+
+  res.writeHead(proxyRes.statusCode, proxyRes.headers)
+  res.end(resBody)
 })
 proxy.on('upgrade', (req, socket, head) => {
   // proxy.ws(req, socket, head)
@@ -217,7 +222,7 @@ const getBodyChunks = (req) => new Promise((resolve, reject) => {
 
 // use this function in the proxy script
 const proxySnsProvider = (proxy, req, res) => {
-  proxy.web(req, res, {target: `http://127.0.0.1:${port}`})
+  proxy.web(req, res, {target: `http://127.0.0.1:${port}`, selfHandleResponse: true})
 }
 
 const isSnsProvider = (req) => 
