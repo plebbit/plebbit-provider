@@ -4,22 +4,6 @@ require('dotenv').config()
 const Debug = require('debug')
 const debug = Debug('plebbit-provider:sns-provider')
 const streamify = require('stream-array')
-const {RateLimiterMemory} = require('rate-limiter-flexible')
-const rateLimiter = new RateLimiterMemory({points: 10, duration: 30 * 60})
-const rateLimited = new Set([
-  '194.11.226.35',
-  '91.99.67.170'
-])
-
-const allowedMethods = new Set([
-  // sns
-  'getAccountInfo'
-])
-
-const allowedAddresses = new Set([
-  // sns
-  '2C7gZo2mFQ7GLsDdZcH6KRhdPZU36MmeUdpQsvwih19F'
-])
 
 const cacheMaxAge = 1000 * 60 * 5
 
@@ -102,10 +86,6 @@ const startServer = (port) => {
   server.keepAliveTimeout = 0
 
   server.on('request', async (req, res) => {
-    res.statusCode = 404
-    res.end()
-    return
-
     // unrelated endpoints
     if (req.url === '/service-worker.js' || req.url === '/manifest.json' || req.url === '/favicon.ico') {
       res.end()
@@ -154,22 +134,6 @@ const startServer = (port) => {
 
     // handle cache
     const cached = cache?.get(jsonBody.replace(/,"id":"[^"]*"/, '')) // remove id field or caching wont work)
-
-    // rate limit after cache to save rpc credits
-    if (!cached) {
-      try {
-        await rateLimiter.consume(req.headers['x-forwarded-for'])
-        if (rateLimited.has(req.headers['x-forwarded-for'])) {
-          throw Error('rate limited')
-        }
-      } catch (e) {
-        // debug(req.method, req.url, req.headers, 'rate limited')
-        debug('rate limited', req.headers['x-forwarded-for'])
-        res.end()
-        return
-      }
-    }
-
     debug(req.method, req.url, req.headers, body, `cached: ${!!cached}`)
     if (cached) {
       res.setHeader('Content-Type', 'application/json')
