@@ -161,7 +161,7 @@ const startServer = (port) => {
 
     // rate limit non-cached non-sns requests
     if (!cached && await isRateLimited(req.headers['x-forwarded-for'])) {
-      debug('rate limited', req.headers, body)
+      debug(req.method, req.url, req.headers, body, 'rate limited')
       res.statusCode = 404
       res.end()
       return
