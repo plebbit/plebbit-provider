@@ -30,7 +30,7 @@ import('quick-lru').then(QuickLRU => {
 })
 
 // start proxy
-const proxy = httpProxy.createProxyServer({})
+const proxy = httpProxy.createProxyServer({selfHandleResponse: true})
 
 // rewrite the request
 proxy.on('proxyReq', function(proxyReq, req, res, options) {
@@ -222,7 +222,7 @@ const getBodyChunks = (req) => new Promise((resolve, reject) => {
 
 // use this function in the proxy script
 const proxySnsProvider = (proxy, req, res) => {
-  proxy.web(req, res, {target: `http://127.0.0.1:${port}`, selfHandleResponse: true})
+  proxy.web(req, res, {target: `http://127.0.0.1:${port}`})
 }
 
 const isSnsProvider = (req) => 
